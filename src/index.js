@@ -42,13 +42,13 @@
 // var diff = new BlinkDiff({
 //     imageAPath: '1.png', // Use file-path 
 //     imageBPath: 'mh.png',
- 
+
 //     thresholdType: BlinkDiff.THRESHOLD_PERCENT,
 //     threshold: 0.3, // 1% threshold 
- 
+
 //     imageOutputPath: 'diff.png'
 // });
- 
+
 // diff.run(function (error, result) {
 //    if (error) {
 //       throw error;
@@ -58,16 +58,25 @@
 //       console.log('Found ' + result.differences + ' differences.');
 //    }
 // });
+import path from 'path';
+var images = require("images");
+import config from './config.js';
+// let inputPath = path.join(config.originalImagePath,"og.jpeg"),
+// outPath = path.join(__dirname,"./temp/",'mhhhct.jpeg')
+// images(inputPath).resize(27,27).save(outPath);
 
-// var images = require("images");
-// // images("mhh.png").resize(27,27).save("mhhhc.png");
+//清理目录下文件
+import fileUtil from './utils/FileUtil.js';
+fileUtil.mkdir(config.originalImagePath);
+fileUtil.deleteFolder(config.originalImagePath);
 
+// deleteFolder(config.originalImagePath);
 // images(images("cj.png"),50, 50,100, 100 ).save("testt.png");
-console.log('test');
+// console.log('test');
 
 
 
 //正式代码
-import {Server} from './server/server.js';
-let server = new Server();
-server.init();
+// import {Server} from './server/server.js';
+// let server = new Server();
+// server.init();

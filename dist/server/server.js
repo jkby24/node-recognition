@@ -14,6 +14,8 @@ var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
 
+var _ManService = require('../service/ManService.js');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -38,13 +40,11 @@ var Server = exports.Server = function () {
 
                 console.log("应用实例，访问地址为 http://%s:%s", host, port);
             });
+            var manService = new _ManService.ManService();
             app.get('/rt', function (req, res) {
 
                 // 输出 JSON 格式
-                var response = {
-                    first_name: 1,
-                    last_name: 2
-                };
+                var response = manService.recognition();
                 console.log(response);
                 res.end(JSON.stringify(response));
             });

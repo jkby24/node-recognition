@@ -38,7 +38,10 @@ export class ManService {
          *    清理目录
          *    boardsPooling = [{}]  
          *    remainPlayerBoards = []; 
-         *    players.forEach(player)
+         *    根据三家牌算出第四个牌
+         *    players.forEach(player=>{
+         *          
+         *      })
          * })
          * 
          * 
@@ -46,6 +49,9 @@ export class ManService {
          * 
          * 
          */
-
+            return [{
+                value:1,
+                suit:0
+            }]
     }
 }

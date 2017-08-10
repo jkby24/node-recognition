@@ -66,6 +66,8 @@
 console.log('test');
 
 
+
+//正式代码
 import {Server} from './server/server.js';
 let server = new Server();
 server.init();

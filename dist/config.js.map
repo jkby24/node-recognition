@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/config.js"],"names":["originalImagePath"],"mappings":";;;;;kBAAe;AACXA,uBAAkB,EADP,CACU;;AADV,C","file":"config.js","sourcesContent":["export default {\r\n    originalImagePath:'',//手机截图后的图片目录\r\n    \r\n}"]}

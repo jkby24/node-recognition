@@ -69,6 +69,8 @@ var _server = require('./server/server.js');
 // images(images("cj.png"),50, 50,100, 100 ).save("testt.png");
 console.log('test');
 
+//正式代码
+
 var server = new _server.Server();
 server.init();
 //# sourceMappingURL=index.js.map

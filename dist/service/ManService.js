@@ -14,6 +14,18 @@ var _config = require('../config.js');
 
 var _config2 = _interopRequireDefault(_config);
 
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
+var _fs = require('fs');
+
+var _fs2 = _interopRequireDefault(_fs);
+
+var _ImageUtil = require('../utils/ImageUtil.js');
+
+var _ImageUtil2 = _interopRequireDefault(_ImageUtil);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -70,6 +82,71 @@ var ManService = exports.ManService = function () {
              * 
              * 
              */
+            if (!_fs2.default.existsSync(_config2.default.originalImagePath)) {
+                return;
+            }
+            var files = _fs2.default.readdirSync(_config2.default.originalImagePath);
+            if (!files || files.length === 0) {
+                return;
+            }
+
+            var ogInfo = {
+                width: 1280,
+                height: 720,
+                fvPoint: {
+                    x: 20,
+                    y: 565
+                },
+                fbPoint: {
+                    x: 20,
+                    y: 612
+                },
+                spacing: 95,
+                valueI: {
+                    width: 30,
+                    height: 47
+                },
+                boardI: {
+                    width: 30,
+                    height: 30
+                },
+                total: 13
+            };
+            files.forEach(function (file, index) {
+                var suffix = '.png';
+                var id = file.split('.')[0] + '_' + index;
+                var iPath = _path2.default.join(_config2.default.originalImagePath, file),
+                    resizePath = _path2.default.join(_config2.default.processedImagePath, '' + id + suffix);
+                _ImageUtil2.default.resize(iPath, resizePath, ogInfo.width, ogInfo.height);
+                var itemInfo = {
+                    id: id,
+                    boards: []
+                };
+                for (var i = 0; i < ogInfo.total; i++) {
+                    var vPoint = {
+                        x: ogInfo.fvPoint.x + ogInfo.spacing * i,
+                        y: ogInfo.fvPoint.y
+                    },
+                        bPoint = {
+                        x: ogInfo.fbPoint.x + ogInfo.spacing * i,
+                        y: ogInfo.fbPoint.y
+                    };
+                    var vFile = _path2.default.join(_config2.default.processedImagePath, id + '_' + i + '_v' + suffix),
+                        bFile = _path2.default.join(_config2.default.processedImagePath, id + '_' + i + '_b' + suffix);
+                    _ImageUtil2.default.cut(resizePath, vFile, vPoint.x, vPoint.y, ogInfo.valueI.width, ogInfo.valueI.height);
+                    _ImageUtil2.default.cut(resizePath, bFile, bPoint.x, bPoint.y, ogInfo.boardI.width, ogInfo.boardI.height);
+                    var valueCp = function valueCp(path) {
+                        return 3;
+                    };
+                    var boardCp = function boardCp(path) {
+                        var boards = _fs2.default.readdirSync(_config2.default.boardsImagePath);
+                    };
+                    // let value = ;
+                    // let boards = ;
+                    itemInfo.boards.push();
+                }
+            }, this);
+
             return [{
                 value: 1,
                 suit: 0

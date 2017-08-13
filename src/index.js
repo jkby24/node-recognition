@@ -38,15 +38,20 @@
 // });
 
 //比较
+// import path from 'path'
+import config from './config.js';
 // var BlinkDiff =  require('blink-diff')
+// var images = require("images");
+// images(path.join(config.originalImagePath,"1.jpeg")).save(path.join(config.originalImagePath,"1.png"));
+// images(path.join(config.originalImagePath,"2.jpeg")).save(path.join(config.originalImagePath,"2.png"));
 // var diff = new BlinkDiff({
-//     imageAPath: '1.png', // Use file-path 
-//     imageBPath: 'mh.png',
+//     imageAPath: path.join(config.originalImagePath,"1.png"), // Use file-path 
+//     imageBPath: path.join(config.originalImagePath,"2.png"),
 
 //     thresholdType: BlinkDiff.THRESHOLD_PERCENT,
 //     threshold: 0.3, // 1% threshold 
 
-//     imageOutputPath: 'diff.png'
+//     imageOutputPath: path.join(config.originalImagePath,"diff.png"),
 // });
 
 // diff.run(function (error, result) {
@@ -58,23 +63,34 @@
 //       console.log('Found ' + result.differences + ' differences.');
 //    }
 // });
-import path from 'path';
-var images = require("images");
-import config from './config.js';
+// import path from 'path';
+// var images = require("images");
+// import config from './config.js';
 // let inputPath = path.join(config.originalImagePath,"og.jpeg"),
 // outPath = path.join(__dirname,"./temp/",'mhhhct.jpeg')
 // images(inputPath).resize(27,27).save(outPath);
 
 //清理目录下文件
-import fileUtil from './utils/FileUtil.js';
-fileUtil.mkdir(config.originalImagePath);
-fileUtil.deleteFolder(config.originalImagePath);
+// import fileUtil from './utils/FileUtil.js';
+// fileUtil.mkdir(config.originalImagePath);
+// fileUtil.deleteFolder(config.originalImagePath);
 
 // deleteFolder(config.originalImagePath);
-// images(images("cj.png"),50, 50,100, 100 ).save("testt.png");
+// images(images(path.join(config.originalImagePath,"og.jpeg"),),20, 565,100, 200 ).save("testt.jpeg");
 // console.log('test');
-
-
+// import fs from 'fs'
+import {ManService} from './service/ManService.js';
+let manService = new ManService();
+manService.recognition();
+// console.log(config.originalImagePath)
+// if (fs.existsSync(config.originalImagePath)) {
+//             console.log('13123');
+//         }
+// let files = fs.readdirSync(config.originalImagePath);
+//         console.log(files);
+//         files.forEach(function(file) {
+//             console.log(file)
+//         }, this);
 
 //正式代码
 // import {Server} from './server/server.js';

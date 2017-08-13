@@ -2,7 +2,7 @@
  * 文件处理工具类
  */
 import fs from 'fs';
-export default class{
+export default class {
 
     /**
      * 创建文件夹

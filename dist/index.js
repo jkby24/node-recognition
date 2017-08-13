@@ -1,6 +1,12 @@
 'use strict';
 
-var _server = require('./server/server.js');
+var _config = require('./config.js');
+
+var _config2 = _interopRequireDefault(_config);
+
+var _ManService = require('./service/ManService.js');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // var Tesseract = require('tesseract.js')
 // var Tesseract = Tesseract.create({
@@ -42,15 +48,20 @@ var _server = require('./server/server.js');
 // });
 
 //比较
+// import path from 'path'
+var manService = new _ManService.ManService();
 // var BlinkDiff =  require('blink-diff')
+// var images = require("images");
+// images(path.join(config.originalImagePath,"1.jpeg")).save(path.join(config.originalImagePath,"1.png"));
+// images(path.join(config.originalImagePath,"2.jpeg")).save(path.join(config.originalImagePath,"2.png"));
 // var diff = new BlinkDiff({
-//     imageAPath: '1.png', // Use file-path 
-//     imageBPath: 'mh.png',
+//     imageAPath: path.join(config.originalImagePath,"1.png"), // Use file-path 
+//     imageBPath: path.join(config.originalImagePath,"2.png"),
 
 //     thresholdType: BlinkDiff.THRESHOLD_PERCENT,
 //     threshold: 0.3, // 1% threshold 
 
-//     imageOutputPath: 'diff.png'
+//     imageOutputPath: path.join(config.originalImagePath,"diff.png"),
 // });
 
 // diff.run(function (error, result) {
@@ -62,15 +73,36 @@ var _server = require('./server/server.js');
 //       console.log('Found ' + result.differences + ' differences.');
 //    }
 // });
-
+// import path from 'path';
 // var images = require("images");
-// // images("mhh.png").resize(27,27).save("mhhhc.png");
+// import config from './config.js';
+// let inputPath = path.join(config.originalImagePath,"og.jpeg"),
+// outPath = path.join(__dirname,"./temp/",'mhhhct.jpeg')
+// images(inputPath).resize(27,27).save(outPath);
 
-// images(images("cj.png"),50, 50,100, 100 ).save("testt.png");
-console.log('test');
+//清理目录下文件
+// import fileUtil from './utils/FileUtil.js';
+// fileUtil.mkdir(config.originalImagePath);
+// fileUtil.deleteFolder(config.originalImagePath);
+
+// deleteFolder(config.originalImagePath);
+// images(images(path.join(config.originalImagePath,"og.jpeg"),),20, 565,100, 200 ).save("testt.jpeg");
+// console.log('test');
+// import fs from 'fs'
+
+manService.recognition();
+// console.log(config.originalImagePath)
+// if (fs.existsSync(config.originalImagePath)) {
+//             console.log('13123');
+//         }
+// let files = fs.readdirSync(config.originalImagePath);
+//         console.log(files);
+//         files.forEach(function(file) {
+//             console.log(file)
+//         }, this);
 
 //正式代码
-
-var server = new _server.Server();
-server.init();
+// import {Server} from './server/server.js';
+// let server = new Server();
+// server.init();
 //# sourceMappingURL=index.js.map

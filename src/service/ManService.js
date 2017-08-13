@@ -2,6 +2,9 @@
  * 主处理类
  */
 import config from '../config.js';
+import path from 'path';
+import fs from 'fs';
+import ImageUtil from '../utils/ImageUtil.js';
 export class ManService {
     constructor() {}
     recognition() {
@@ -49,9 +52,76 @@ export class ManService {
          * 
          * 
          */
-            return [{
-                value:1,
-                suit:0
-            }]
+        if (!fs.existsSync(config.originalImagePath)) {
+            return;
+        }
+        let files = fs.readdirSync(config.originalImagePath);
+        if(!files || files.length===0){
+            return;
+        }
+
+        let ogInfo = {
+            width:1280,
+            height:720,
+            fvPoint:{
+                x:20,
+                y:565
+            },
+            fbPoint:{
+                x:20,
+                y:612
+            },
+            spacing:95,
+            valueI:{
+                width:30,
+                height:47
+            },
+            boardI:{
+                width:30,
+                height:30
+            },
+            total:13
+        };
+        files.forEach(function(file,index) {
+            let suffix = '.png';
+            let id = `${file.split('.')[0]}_${index}`;
+            let iPath = path.join(config.originalImagePath,file),
+                resizePath = path.join(config.processedImagePath,`${id}${suffix}`);
+            ImageUtil.resize(iPath,resizePath,ogInfo.width,ogInfo.height);
+            let itemInfo = {
+                id:id,
+                boards:[]
+            }
+            for(let i =0;i<ogInfo.total;i++){
+                let vPoint = {
+                    x:ogInfo.fvPoint.x + ogInfo.spacing*i,
+                    y:ogInfo.fvPoint.y,
+                },bPoint = {
+                    x:ogInfo.fbPoint.x + ogInfo.spacing*i,
+                    y:ogInfo.fbPoint.y,
+                };
+                let vFile = path.join(config.processedImagePath,`${id}_${i}_v${suffix}`),
+                    bFile = path.join(config.processedImagePath,`${id}_${i}_b${suffix}`);
+                ImageUtil.cut(resizePath,vFile,vPoint.x,vPoint.y,ogInfo.valueI.width,ogInfo.valueI.height);
+                ImageUtil.cut(resizePath,bFile,bPoint.x,bPoint.y,ogInfo.boardI.width,ogInfo.boardI.height);
+                let valueCp = function(path){
+                    return 3;
+                }
+                let boardCp = function(path){
+                    let boards = fs.readdirSync(config.boardsImagePath);
+                    
+                }
+                // let value = ;
+                // let boards = ;
+                itemInfo.boards.push()
+            }
+        }, this);
+        
+        
+        
+        return [{
+            value:1,
+            suit:0
+        }]
     }
 }

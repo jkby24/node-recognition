@@ -2,11 +2,11 @@
  * 图片处理工具类
  */
 import images from 'images';
-export class ImageUtil {
-    static resize(){
-        images("mhh.png").resize(27,27).save("mhhhc.png");
+export default class {
+    static resize(inputPath, outPath, width, height) {
+        images(inputPath).resize(width, height).save(outPath);
     }
-    static cut(){
-        images(images("cj.png"),50, 50,100, 100 ).save("testt.png");
+    static cut(inputPath, outPath, x, y, width, height) {
+        images(images(inputPath), x, y, width, height).save(outPath);
     }
 }

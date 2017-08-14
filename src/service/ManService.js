@@ -14,7 +14,7 @@ export class ManService {
             height: 720,
             fvPoint: {
                 x: 20,
-                y: 565
+                y: 570
             },
             fbPoint: {
                 x: 20,
@@ -22,12 +22,12 @@ export class ManService {
             },
             spacing: 95,
             valueI: {
-                width: 30,
-                height: 47
+                width: 32,
+                height: 42
             },
             boardI: {
                 width: 30,
-                height: 30
+                height: 28
             },
             total: 13
         };
@@ -91,8 +91,8 @@ export class ManService {
         FileUtil.mkdir(config.processedImagePath);
         files.forEach((file, index) => {
             console.log(`开始解析${file}`);
-            promises.push((()=>{
-                return this.fileProcess(file, index).then((info)=>{
+            promises.push((() => {
+                return this.fileProcess(file, index).then((info) => {
                     players.push(info);
                     console.log(`${file}解析完成`);
                     return;
@@ -102,6 +102,23 @@ export class ManService {
 
         return Promise.all(promises).then((data) => {
             console.log(players);
+            // let remainPlayerBoards = []; 
+
+            // let values = ['A','K','Q','J','10','9','8','7','6','5','4','3','2'],
+            //     suits = [0,1,2,3];    
+            // let boardsPooling = [];
+            // values.forEach(value=>{
+            //     suits.forEach(suit=>{
+            //         boardsPooling.push({
+            //             value: value,
+            //             suit: suit
+            //         })
+            //     })
+            // })
+            // players.forEach((player)=>{
+
+            // });
+
             // FileUtil.deleteFolder(config.processedImagePath);
             return [{
                 value: 1,
@@ -124,11 +141,11 @@ export class ManService {
         // for (let i = 0; i < 8; i++) {
         for (let i = 0; i < this.ogInfo.total; i++) {
             let vPoint = {
-                    x: this.ogInfo.fvPoint.x + this.ogInfo.spacing * i,
+                    x: this.ogInfo.fvPoint.x + this.ogInfo.spacing * i + (i >= 10 ? 2 : 0),
                     y: this.ogInfo.fvPoint.y,
                 },
                 bPoint = {
-                    x: this.ogInfo.fbPoint.x + this.ogInfo.spacing * i,
+                    x: this.ogInfo.fbPoint.x + this.ogInfo.spacing * i + (i >= 10 ? 2 : 0),
                     y: this.ogInfo.fbPoint.y,
                 };
             let vFile = path.join(config.processedImagePath, `${id}_${i}_v${suffix}`),
@@ -153,7 +170,7 @@ export class ManService {
     }
 
     valueCp(path) {
-        let value=3;
+        let value = 3;
         // console.log(`读取${path}值成功${value}`);
         return value;
     }
@@ -167,7 +184,7 @@ export class ManService {
         let promises = [];
         boards.forEach(boad => {
             promises.push(() => {
-                return ImageUtil.isDiff(file,path.join(config.boardsImagePath, boad)).then(isDiff => {
+                return ImageUtil.isDiff(file, path.join(config.boardsImagePath, boad)).then(isDiff => {
                     if (!isDiff) {
                         resultSuit = boad.split('.')[0];
                     }

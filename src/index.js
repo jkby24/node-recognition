@@ -39,19 +39,19 @@
 
 //比较
 // import path from 'path'
-import config from './config.js';
+// import config from './config.js';
 // var BlinkDiff =  require('blink-diff')
 // var images = require("images");
-// images(path.join(config.originalImagePath,"1.jpeg")).save(path.join(config.originalImagePath,"1.png"));
-// images(path.join(config.originalImagePath,"2.jpeg")).save(path.join(config.originalImagePath,"2.png"));
+// // images(path.join(config.originalImagePath,"1.jpeg")).save(path.join(config.originalImagePath,"1.png"));
+// // images(path.join(config.originalImagePath,"2.jpeg")).save(path.join(config.originalImagePath,"2.png"));
 // var diff = new BlinkDiff({
-//     imageAPath: path.join(config.originalImagePath,"1.png"), // Use file-path 
-//     imageBPath: path.join(config.originalImagePath,"2.png"),
+//     imageAPath: path.join(config.boardsImagePath,"1.png"), // Use file-path 
+//     imageBPath: path.join(config.boardsImagePath,"og_0_9_b.png"),
 
 //     thresholdType: BlinkDiff.THRESHOLD_PERCENT,
-//     threshold: 0.3, // 1% threshold 
+//     threshold: 0.04, // 1% threshold 
 
-//     imageOutputPath: path.join(config.originalImagePath,"diff.png"),
+//     imageOutputPath: path.join(config.boardsImagePath,"diff.png"),
 // });
 
 // diff.run(function (error, result) {
@@ -63,6 +63,11 @@ import config from './config.js';
 //       console.log('Found ' + result.differences + ' differences.');
 //    }
 // });
+
+
+
+
+
 // import path from 'path';
 // var images = require("images");
 // import config from './config.js';
@@ -79,9 +84,19 @@ import config from './config.js';
 // images(images(path.join(config.originalImagePath,"og.jpeg"),),20, 565,100, 200 ).save("testt.jpeg");
 // console.log('test');
 // import fs from 'fs'
+
+
+
+
 import {ManService} from './service/ManService.js';
 let manService = new ManService();
-manService.recognition();
+manService.recognition().then(()=>{
+
+});
+
+
+
+
 // console.log(config.originalImagePath)
 // if (fs.existsSync(config.originalImagePath)) {
 //             console.log('13123');

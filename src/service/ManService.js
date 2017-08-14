@@ -5,8 +5,34 @@ import config from '../config.js';
 import path from 'path';
 import fs from 'fs';
 import ImageUtil from '../utils/ImageUtil.js';
+import FileUtil from '../utils/FileUtil.js';
+// import BoardsConst from '../utils/BoardsConst.js';
 export class ManService {
-    constructor() {}
+    constructor() {
+        this.ogInfo = {
+            width: 1280,
+            height: 720,
+            fvPoint: {
+                x: 20,
+                y: 565
+            },
+            fbPoint: {
+                x: 20,
+                y: 612
+            },
+            spacing: 95,
+            valueI: {
+                width: 30,
+                height: 47
+            },
+            boardI: {
+                width: 30,
+                height: 30
+            },
+            total: 13
+        };
+    }
+
     recognition() {
 
         /** players = [{
@@ -56,72 +82,113 @@ export class ManService {
             return;
         }
         let files = fs.readdirSync(config.originalImagePath);
-        if(!files || files.length===0){
+        if (!files || files.length === 0) {
             return;
         }
-
-        let ogInfo = {
-            width:1280,
-            height:720,
-            fvPoint:{
-                x:20,
-                y:565
-            },
-            fbPoint:{
-                x:20,
-                y:612
-            },
-            spacing:95,
-            valueI:{
-                width:30,
-                height:47
-            },
-            boardI:{
-                width:30,
-                height:30
-            },
-            total:13
-        };
-        files.forEach(function(file,index) {
-            let suffix = '.png';
-            let id = `${file.split('.')[0]}_${index}`;
-            let iPath = path.join(config.originalImagePath,file),
-                resizePath = path.join(config.processedImagePath,`${id}${suffix}`);
-            ImageUtil.resize(iPath,resizePath,ogInfo.width,ogInfo.height);
-            let itemInfo = {
-                id:id,
-                boards:[]
-            }
-            for(let i =0;i<ogInfo.total;i++){
-                let vPoint = {
-                    x:ogInfo.fvPoint.x + ogInfo.spacing*i,
-                    y:ogInfo.fvPoint.y,
-                },bPoint = {
-                    x:ogInfo.fbPoint.x + ogInfo.spacing*i,
-                    y:ogInfo.fbPoint.y,
-                };
-                let vFile = path.join(config.processedImagePath,`${id}_${i}_v${suffix}`),
-                    bFile = path.join(config.processedImagePath,`${id}_${i}_b${suffix}`);
-                ImageUtil.cut(resizePath,vFile,vPoint.x,vPoint.y,ogInfo.valueI.width,ogInfo.valueI.height);
-                ImageUtil.cut(resizePath,bFile,bPoint.x,bPoint.y,ogInfo.boardI.width,ogInfo.boardI.height);
-                let valueCp = function(path){
-                    return 3;
-                }
-                let boardCp = function(path){
-                    let boards = fs.readdirSync(config.boardsImagePath);
-                    
-                }
-                // let value = ;
-                // let boards = ;
-                itemInfo.boards.push()
-            }
+        let players = [];
+        let promises = [];
+        FileUtil.deleteFolder(config.processedImagePath);
+        FileUtil.mkdir(config.processedImagePath);
+        files.forEach((file, index) => {
+            console.log(`开始解析${file}`);
+            promises.push((()=>{
+                return this.fileProcess(file, index).then((info)=>{
+                    players.push(info);
+                    console.log(`${file}解析完成`);
+                    return;
+                })
+            })());
         }, this);
-        
-        
-        
-        return [{
-            value:1,
-            suit:0
-        }]
+
+        return Promise.all(promises).then((data) => {
+            console.log(players);
+            // FileUtil.deleteFolder(config.processedImagePath);
+            return [{
+                value: 1,
+                suit: 0
+            }]
+        });
+    }
+
+    fileProcess(file, index) {
+        let suffix = '.png';
+        let id = `${file.split('.')[0]}_${index}`;
+        let iPath = path.join(config.originalImagePath, file),
+            resizePath = path.join(config.processedImagePath, `${id}${suffix}`);
+        ImageUtil.resize(iPath, resizePath, this.ogInfo.width, this.ogInfo.height);
+        let itemInfo = {
+            id: id,
+            boards: []
+        }
+        let promises = [];
+        // for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < this.ogInfo.total; i++) {
+            let vPoint = {
+                    x: this.ogInfo.fvPoint.x + this.ogInfo.spacing * i,
+                    y: this.ogInfo.fvPoint.y,
+                },
+                bPoint = {
+                    x: this.ogInfo.fbPoint.x + this.ogInfo.spacing * i,
+                    y: this.ogInfo.fbPoint.y,
+                };
+            let vFile = path.join(config.processedImagePath, `${id}_${i}_v${suffix}`),
+                bFile = path.join(config.processedImagePath, `${id}_${i}_b${suffix}`);
+            ImageUtil.cut(resizePath, vFile, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height);
+            ImageUtil.cut(resizePath, bFile, bPoint.x, bPoint.y, this.ogInfo.boardI.width, this.ogInfo.boardI.height);
+            let value = this.valueCp(vFile);
+            promises.push(new Promise((resolve) => {
+                return this.boardCp(bFile).then((suit) => {
+                    itemInfo.boards.push({
+                        value: value,
+                        suit: suit
+                    });
+                    resolve(suit);
+                })
+            }));
+        }
+        return Promise.all(promises).then(() => {
+            console.log(`file文件值为：${itemInfo}`);
+            return itemInfo;
+        });
+    }
+
+    valueCp(path) {
+        let value=3;
+        // console.log(`读取${path}值成功${value}`);
+        return value;
+    }
+
+    boardCp(file) {
+        let boards = fs.readdirSync(config.boardsImagePath);
+        if (!boards) {
+            throw new Error('config.boardsImagePath目录空');
+        }
+        let resultSuit;
+        let promises = [];
+        boards.forEach(boad => {
+            promises.push(() => {
+                return ImageUtil.isDiff(file,path.join(config.boardsImagePath, boad)).then(isDiff => {
+                    if (!isDiff) {
+                        resultSuit = boad.split('.')[0];
+                    }
+                    return resultSuit;
+                })
+            })
+        });
+        return this.sequenceExecutePromise(promises).then(() => {
+            if (!resultSuit) {
+                console.log(`解析花色文件${file}失败`);
+            }
+            console.log(`解析花色文件${file}成功：${resultSuit}`);
+            return resultSuit;
+        });
+    }
+
+    sequenceExecutePromise(promises) {
+        var result = Promise.resolve();
+        promises.forEach((promise) => {
+            result = result.then(promise);
+        });
+        return result;
     }
 }

@@ -1,12 +1,18 @@
-// var Tesseract = require('tesseract.js')
-// var Tesseract = Tesseract.create({
-//     workerPath: './libs/worker.js',
-//     langPath: './libs/',
-// })
-// Tesseract.recognize('t.png')
+// import Tesseract from 'tesseract.js'
+// // Tesseract = Tesseract.create({
+// //     workerPath: './libs/worker.js',
+// //     langPath: './libs/',
+// // })
+// Tesseract.recognize('./src/temp/processed/C2_0_7_v.png')
 // .then(function(result){
-//     console.log(result)
+//     console.log(result.text)
 // })
+// import path from 'path'
+// import config from './config.js';
+// import ImageUtil from './utils/ImageUtil.js'; 
+// ImageUtil.getValue(path.join(config.processedImagePath,"T2_2_5_v.png"))
+
+
 // var getPixels = require("get-pixels")
 
 
@@ -45,13 +51,13 @@
 // // images(path.join(config.originalImagePath,"1.jpeg")).save(path.join(config.originalImagePath,"1.png"));
 // // images(path.join(config.originalImagePath,"2.jpeg")).save(path.join(config.originalImagePath,"2.png"));
 // var diff = new BlinkDiff({
-//     imageAPath: path.join(config.boardsImagePath,"1.png"), // Use file-path 
-//     imageBPath: path.join(config.boardsImagePath,"og_0_9_b.png"),
+//     imageAPath: path.join(path.join(process.cwd(),'/src/temp/test'),"T2_2_12_v.png"), // Use file-path 
+//     imageBPath: path.join(path.join(process.cwd(),'/src/temp/test'),"2.b.png"),
 
 //     thresholdType: BlinkDiff.THRESHOLD_PERCENT,
-//     threshold: 0.04, // 1% threshold 
+//     threshold: 0.05, // 1% threshold 
 
-//     imageOutputPath: path.join(config.boardsImagePath,"diff.png"),
+//     imageOutputPath:path.join(path.join(process.cwd(),'/src/temp/test'),"diff.png"),
 // });
 
 // diff.run(function (error, result) {
@@ -111,3 +117,50 @@ manService.recognition().then(()=>{
 // import {Server} from './server/server.js';
 // let server = new Server();
 // server.init();
+
+
+
+
+
+
+
+// import config from './config.js';
+// import path from 'path';
+// import fs from 'fs';
+// import ImageUtil from './utils/ImageUtil.js';
+
+// // // //转换为大图
+// // // let values = fs.readdirSync(config.valuesImagePath);
+// // // values.forEach(value => {
+// // //     // let names = value.split('.');
+// // //     let bef = path.join(config.valuesImagePath,value);
+// // //     let af = path.join(config.valuesMImagePath,value);
+// // //     ImageUtil.resize(bef, af, 100,100);
+// // // });
+
+// let fload = path.join(process.cwd(),'/src/temp/test');
+
+// // let APath = path.join(fload,'Q.r.png');
+// // let BPath = path.join(fload,'C2_0_4_v.png');
+
+// // let APath = path.join(fload,'Q.r.png');
+// // let BPath = path.join(fload,'C2_0_4_v.png');
+
+// let APath = path.join(fload,'5.r.png');
+// let BPath = path.join(fload,'T2_2_8_v.png');
+
+
+
+// let CPath = path.join(fload,'3.b.png');
+// // let APath2 =  path.join(fload,'5.b.l.png');
+// // let BPath2 =  path.join(fload,'6.b.l.png');
+// // let CPath2 =  path.join(fload,'3.b.l.png');
+
+
+// // // ImageUtil.resize(APath, APath2, 200,200);
+// // // ImageUtil.resize(BPath, BPath2, 200,200);
+// // // ImageUtil.resize(CPath, CPath2, 200,200);
+
+// ImageUtil.isDiff(APath, BPath,0.1,path.join(config.testImagePath,"diff.png")).then(isDiff => {
+//     console.log(isDiff)
+// })

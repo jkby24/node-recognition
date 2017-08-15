@@ -21,7 +21,8 @@
   "dependencies": {
     "blink-diff": "^1.0.13",
     "express": "^4.14.0",
-    "images": "^3.0.0"
+    "images": "^3.0.0",
+    "tesseract.js": "^1.0.10"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",

@@ -6,6 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import ImageUtil from '../utils/ImageUtil.js';
 import FileUtil from '../utils/FileUtil.js';
+// import _ from 'lodash';
 // import BoardsConst from '../utils/BoardsConst.js';
 export class ManService {
     constructor() {
@@ -102,23 +103,37 @@ export class ManService {
 
         return Promise.all(promises).then((data) => {
             console.log(players);
-            // let remainPlayerBoards = []; 
+            let remainPlayerBoards = []; 
 
-            // let values = ['A','K','Q','J','10','9','8','7','6','5','4','3','2'],
-            //     suits = [0,1,2,3];    
-            // let boardsPooling = [];
-            // values.forEach(value=>{
-            //     suits.forEach(suit=>{
-            //         boardsPooling.push({
-            //             value: value,
-            //             suit: suit
-            //         })
-            //     })
-            // })
-            // players.forEach((player)=>{
+            let values = ['A','K','Q','J','10','9','8','7','6','5','4','3','2'],
+                suits = [0,1,2,3];    
+            let boardsPooling = [];
+            values.forEach(value=>{
+                suits.forEach(suit=>{
+                    boardsPooling.push({
+                        value: value,
+                        suit: suit
+                    })
+                })
+            });
+            console.log(JSON.stringify(players));
+            players.forEach((player)=>{
+                player.boards.forEach(board=>{
+                    let index = boardsPooling.findIndex(bt => { 
+                        return board.value == bt.value && board.suit == bt.suit; 
+                    });
+                    if(index!=-1){
+                        boardsPooling.splice(index,1);
+                    }else{
+                        console.log(`未找到值：${board.value},花色：${board.suit}`)
+                    }
+                })
+            });
 
-            // });
-
+            console.log('剩下：')
+            boardsPooling.forEach(bo =>{
+                console.log(`值：${bo.value},花色：${bo.suit}`);
+            })
             // FileUtil.deleteFolder(config.processedImagePath);
             return [{
                 value: 1,
@@ -141,39 +156,67 @@ export class ManService {
         // for (let i = 0; i < 8; i++) {
         for (let i = 0; i < this.ogInfo.total; i++) {
             let vPoint = {
-                    x: this.ogInfo.fvPoint.x + this.ogInfo.spacing * i + (i >= 10 ? 2 : 0),
+                    x: this.ogInfo.fvPoint.x + this.ogInfo.spacing * i + (i >= 9 ? 2 : 0),
                     y: this.ogInfo.fvPoint.y,
                 },
                 bPoint = {
-                    x: this.ogInfo.fbPoint.x + this.ogInfo.spacing * i + (i >= 10 ? 2 : 0),
+                    x: this.ogInfo.fbPoint.x + this.ogInfo.spacing * i + (i >= 9 ? 2 : 0),
                     y: this.ogInfo.fbPoint.y,
                 };
             let vFile = path.join(config.processedImagePath, `${id}_${i}_v${suffix}`),
                 bFile = path.join(config.processedImagePath, `${id}_${i}_b${suffix}`);
-            ImageUtil.cut(resizePath, vFile, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height);
+            // ImageUtil.cut(resizePath, vFile, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height);
+            ImageUtil.cutAndResize(resizePath, vFile, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height,200,200);
             ImageUtil.cut(resizePath, bFile, bPoint.x, bPoint.y, this.ogInfo.boardI.width, this.ogInfo.boardI.height);
-            let value = this.valueCp(vFile);
             promises.push(new Promise((resolve) => {
                 return this.boardCp(bFile).then((suit) => {
-                    itemInfo.boards.push({
-                        value: value,
-                        suit: suit
+                    return this.valueByTesseract(vFile).then((value)=>{
+                        console.log(`值：${value},花色：${suit}`);
+                        itemInfo.boards.push({
+                            value: value,
+                            suit: suit
+                        });
+                        resolve();
                     });
-                    resolve(suit);
                 })
             }));
         }
         return Promise.all(promises).then(() => {
-            console.log(`file文件值为：${itemInfo}`);
             return itemInfo;
         });
     }
 
-    valueCp(path) {
-        let value = 3;
-        // console.log(`读取${path}值成功${value}`);
-        return value;
+    valueByTesseract(file){
+        return ImageUtil.getValue(file);
     }
+
+    valueByDiff(file){
+        let values = fs.readdirSync(config.valuesMImagePath);
+        if (!values) {
+            throw new Error('config.valuesImagePath目录空');
+        }
+        
+        let resultValue;
+        let promises = [];
+        values.forEach(value => {
+            promises.push(() => {
+                return ImageUtil.isDiff(file, path.join(config.valuesMImagePath, value),0.5).then(isDiff => {
+                    if (!isDiff) {
+                        resultValue = value.split('.')[0];
+                    }
+                    return resultValue;
+                })
+            })
+        });
+        return this.sequenceExecutePromise(promises).then(() => {
+            if (!resultValue) {
+                console.log(`解析牌值文件${file}失败`);
+            }else{
+                console.log(`解析牌值文件${file}成功：${resultValue}`);
+            }
+            return resultValue;
+        });
+    } 
 
     boardCp(file) {
         let boards = fs.readdirSync(config.boardsImagePath);
@@ -193,10 +236,11 @@ export class ManService {
             })
         });
         return this.sequenceExecutePromise(promises).then(() => {
-            if (!resultSuit) {
-                console.log(`解析花色文件${file}失败`);
-            }
-            console.log(`解析花色文件${file}成功：${resultSuit}`);
+            // if (!resultSuit) {
+            //     console.log(`解析花色文件${file}失败`);
+            // }else{
+            //     console.log(`解析花色文件${file}成功：${resultSuit}`);
+            // }
             return resultSuit;
         });
     }

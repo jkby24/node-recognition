@@ -124,10 +124,10 @@ manService.recognition().then(()=>{
 
 
 
-// import config from './config.js';
-// import path from 'path';
-// import fs from 'fs';
-// import ImageUtil from './utils/ImageUtil.js';
+import config from './config.js';
+import path from 'path';
+import fs from 'fs';
+import ImageUtil from './utils/ImageUtil.js';
 
 // // // //转换为大图
 // // // let values = fs.readdirSync(config.valuesImagePath);
@@ -164,3 +164,11 @@ manService.recognition().then(()=>{
 // ImageUtil.isDiff(APath, BPath,0.1,path.join(config.testImagePath,"diff.png")).then(isDiff => {
 //     console.log(isDiff)
 // })
+// import im from 'imagemagick';
+// let fload = path.join(process.cwd(),'/src/temp/test');
+
+// im.convert([path.join(fload,'ct1.png'), '-brightness-contrast', '0,500', path.join(fload,'ct1_2.png')], 
+// function(err, stdout){
+//   if (err) throw err;
+//   console.log('stdout:', stdout);
+// });

@@ -4,6 +4,7 @@
 import images from 'images';
 import BlinkDiff from 'blink-diff';
 import Tesseract from 'tesseract.js';
+import im from 'imagemagick';
 export default class {
     static resize(inputPath, outPath, width, height) {
         images(inputPath).resize(width, height).save(outPath);
@@ -17,22 +18,33 @@ export default class {
         images(images(inputPath), x, y, width, height).resize(rWidth, rHeight).save(outPath);
     }
 
+    static contrast(inputPath, outPath){
+        return new Promise((resolve, reject) =>{ 
+            im.convert([inputPath, '-brightness-contrast', '0,500', outPath], 
+                function(err, stdout){
+                    if (err) throw err;
+                    resolve();
+            });
+        })
+    }
+
     static isDiff(imageAPath,imageBPath,threshold = 0.04,outputPath){
         return new Promise(function(resolve, reject) {
-            var diff = new BlinkDiff({
-                imageAPath: imageAPath, // Use file-path 
-                imageBPath: imageBPath,
-                thresholdType: BlinkDiff.THRESHOLD_PERCENT,
-                threshold: threshold, // 1% threshold 
-                imageOutputPath: outputPath,
-            });
-            diff.run(function (error, result) {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve(!diff.hasPassed(result.code));
-                }
-            });
+            // var diff = new BlinkDiff({
+            //     imageAPath: imageAPath, // Use file-path 
+            //     imageBPath: imageBPath,
+            //     thresholdType: BlinkDiff.THRESHOLD_PERCENT,
+            //     threshold: threshold, // 1% threshold 
+            //     imageOutputPath: outputPath,
+            // });
+            // diff.run(function (error, result) {
+            //     if (error) {
+            //         reject(error);
+            //     } else {
+            //         resolve(!diff.hasPassed(result.code));
+            //     }
+            // });
+            resolve(false);
         });
         
     }

@@ -91,6 +91,9 @@ export class ManService {
         FileUtil.deleteFolder(config.processedImagePath);
         FileUtil.mkdir(config.processedImagePath);
         files.forEach((file, index) => {
+            if(file.indexOf('.DS_Store')!=-1){
+                return;
+            }
             console.log(`开始解析${file}`);
             promises.push((() => {
                 return this.fileProcess(file, index).then((info) => {
@@ -163,21 +166,24 @@ export class ManService {
                     x: this.ogInfo.fbPoint.x + this.ogInfo.spacing * i + (i >= 9 ? 2 : 0),
                     y: this.ogInfo.fbPoint.y,
                 };
-            let vFile = path.join(config.processedImagePath, `${id}_${i}_v${suffix}`),
+            let vFileTemp = path.join(config.processedImagePath, `${id}_${i}_v_temp${suffix}`),
+                vFile = path.join(config.processedImagePath, `${id}_${i}_v${suffix}`),
                 bFile = path.join(config.processedImagePath, `${id}_${i}_b${suffix}`);
             // ImageUtil.cut(resizePath, vFile, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height);
-            ImageUtil.cutAndResize(resizePath, vFile, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height,200,200);
+            ImageUtil.cutAndResize(resizePath, vFileTemp, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height,300,300);
             ImageUtil.cut(resizePath, bFile, bPoint.x, bPoint.y, this.ogInfo.boardI.width, this.ogInfo.boardI.height);
             promises.push(new Promise((resolve) => {
                 return this.boardCp(bFile).then((suit) => {
-                    return this.valueByTesseract(vFile).then((value)=>{
-                        console.log(`值：${value},花色：${suit}`);
-                        itemInfo.boards.push({
-                            value: value,
-                            suit: suit
+                    return ImageUtil.contrast(vFileTemp,vFile).then(()=>{
+                        this.valueByTesseract(vFile).then((value)=>{
+                            console.log(`值：${value},花色：${suit}`);
+                            itemInfo.boards.push({
+                                value: value,
+                                suit: suit
+                            });
+                            resolve();
                         });
-                        resolve();
-                    });
+                    })
                 })
             }));
         }

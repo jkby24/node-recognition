@@ -10,7 +10,7 @@
 // import path from 'path'
 // import config from './config.js';
 // import ImageUtil from './utils/ImageUtil.js'; 
-// ImageUtil.getValue(path.join(config.processedImagePath,"T2_2_5_v.png"))
+// ImageUtil.getValue(path.join(config.testImagePath,"T2_0_4_v.png"))
 
 
 // var getPixels = require("get-pixels")
@@ -124,51 +124,52 @@ manService.recognition().then(()=>{
 
 
 
-import config from './config.js';
-import path from 'path';
-import fs from 'fs';
-import ImageUtil from './utils/ImageUtil.js';
+// import config from './config.js';
+// import path from 'path';
+// import fs from 'fs';
+// import ImageUtil from './utils/ImageUtil.js';
 
-// // // //转换为大图
-// // // let values = fs.readdirSync(config.valuesImagePath);
-// // // values.forEach(value => {
-// // //     // let names = value.split('.');
-// // //     let bef = path.join(config.valuesImagePath,value);
-// // //     let af = path.join(config.valuesMImagePath,value);
-// // //     ImageUtil.resize(bef, af, 100,100);
-// // // });
+// // // // //转换为大图
+// // // // let values = fs.readdirSync(config.valuesImagePath);
+// // // // values.forEach(value => {
+// // // //     // let names = value.split('.');
+// // // //     let bef = path.join(config.valuesImagePath,value);
+// // // //     let af = path.join(config.valuesMImagePath,value);
+// // // //     ImageUtil.resize(bef, af, 100,100);
+// // // // });
 
+// // let fload = path.join(process.cwd(),'/src/temp/test');
+
+// // // let APath = path.join(fload,'Q.r.png');
+// // // let BPath = path.join(fload,'C2_0_4_v.png');
+
+// // // let APath = path.join(fload,'Q.r.png');
+// // // let BPath = path.join(fload,'C2_0_4_v.png');
+
+// // let APath = path.join(fload,'5.r.png');
+// // let BPath = path.join(fload,'T2_2_8_v.png');
+
+
+
+// // let CPath = path.join(fload,'3.b.png');
+// // // let APath2 =  path.join(fload,'5.b.l.png');
+// // // let BPath2 =  path.join(fload,'6.b.l.png');
+// // // let CPath2 =  path.join(fload,'3.b.l.png');
+
+
+// // // // ImageUtil.resize(APath, APath2, 200,200);
+// // // // ImageUtil.resize(BPath, BPath2, 200,200);
+// // // // ImageUtil.resize(CPath, CPath2, 200,200);
+
+// // ImageUtil.isDiff(APath, BPath,0.1,path.join(config.testImagePath,"diff.png")).then(isDiff => {
+// //     console.log(isDiff)
+// // // })
+// // import im from './libs/imagemagick.js';
 // let fload = path.join(process.cwd(),'/src/temp/test');
+// // im.convert([path.join(fload,'ct1.png'),'-brightness-contrast', '0,500', path.join(fload,'ct1_29.png')], 
+// // function(err, stdout){
+// //   if (err) throw err;
+// //   console.log('stdout:', stdout);
+// // });
 
-// // let APath = path.join(fload,'Q.r.png');
-// // let BPath = path.join(fload,'C2_0_4_v.png');
-
-// // let APath = path.join(fload,'Q.r.png');
-// // let BPath = path.join(fload,'C2_0_4_v.png');
-
-// let APath = path.join(fload,'5.r.png');
-// let BPath = path.join(fload,'T2_2_8_v.png');
-
-
-
-// let CPath = path.join(fload,'3.b.png');
-// // let APath2 =  path.join(fload,'5.b.l.png');
-// // let BPath2 =  path.join(fload,'6.b.l.png');
-// // let CPath2 =  path.join(fload,'3.b.l.png');
-
-
-// // // ImageUtil.resize(APath, APath2, 200,200);
-// // // ImageUtil.resize(BPath, BPath2, 200,200);
-// // // ImageUtil.resize(CPath, CPath2, 200,200);
-
-// ImageUtil.isDiff(APath, BPath,0.1,path.join(config.testImagePath,"diff.png")).then(isDiff => {
-//     console.log(isDiff)
-// })
-// import im from 'imagemagick';
-// let fload = path.join(process.cwd(),'/src/temp/test');
-
-// im.convert([path.join(fload,'ct1.png'), '-brightness-contrast', '0,500', path.join(fload,'ct1_2.png')], 
-// function(err, stdout){
-//   if (err) throw err;
-//   console.log('stdout:', stdout);
-// });
+// ImageUtil.contrast(path.join(fload,'ct1.png'),path.join(fload,'ct1_30.png'))

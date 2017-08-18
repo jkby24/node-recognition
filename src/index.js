@@ -94,11 +94,11 @@
 
 
 
-import {ManService} from './service/ManService.js';
-let manService = new ManService();
-manService.recognition().then(()=>{
+// import {ManService} from './service/ManService.js';
+// let manService = new ManService();
+// manService.recognition().then(()=>{
 
-});
+// });
 
 
 
@@ -114,9 +114,9 @@ manService.recognition().then(()=>{
 //         }, this);
 
 //正式代码
-// import {Server} from './server/server.js';
-// let server = new Server();
-// server.init();
+import {Server} from './server/server.js';
+let server = new Server();
+server.init();
 
 
 
@@ -173,3 +173,14 @@ manService.recognition().then(()=>{
 // // });
 
 // ImageUtil.contrast(path.join(fload,'ct1.png'),path.join(fload,'ct1_30.png'))
+
+
+
+
+//adb 
+// import adb from 'node-adb';
+// adb({
+//     cmd: ['devices']
+// },function(result){
+//     console.log(result);
+// });

@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>index</title>
+    <script src="/vue.js"></script>
+    <script src="/vue-resource.js"></script>
+    <link rel="stylesheet" href="/index.css">
+    <script src="/index.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <el-button type="primary" @click="test">开始</el-button>
+    </div>
+    
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                message: 'Hello Vue!'
+            },
+            methods: {
+                test:function(){
+                    // this.$http.get('/rt', [options]).then((response) => {
+                    //     debugger;
+                    //     // 响应成功回调
+                    // }, (response) => {
+                    //     // 响应错误回调
+                    // });
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

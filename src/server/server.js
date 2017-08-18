@@ -8,8 +8,20 @@ export class Server {
     init() {
         let app = express();
         app.use(express.static('public'));
-        app.get('/index.htm', function (req, res) {
-            res.sendFile(__dirname + "/" + "index.htm");
+        app.get('/index.html', function (req, res) {
+            res.sendFile(__dirname + "/" + "index.html");
+        });
+        app.get('/vue.js', function (req, res) {
+            res.sendFile(__dirname + "/resource/" + "vue.js");
+        });
+        app.get('/index.js', function (req, res) {
+            res.sendFile(__dirname + "/resource/" + "index.js");
+        });
+        app.get('/vue-resource.js', function (req, res) {
+            res.sendFile(__dirname + "/resource/" + "vue-resource.js");
+        });
+        app.get('/index.css', function (req, res) {
+            res.sendFile(__dirname + "/resource/" + "index.css");
         });
         let server = app.listen(8081, function () {
 
@@ -23,8 +35,11 @@ export class Server {
         app.get('/rt', function (req, res) {
 
             // 输出 JSON 格式
-            let response = manService.recognition();
-            console.log(response);
+            // let response = manService.recognition();
+            console.log('2313');
+            let response={
+                a:123
+            }
             res.end(JSON.stringify(response));
         })
     }

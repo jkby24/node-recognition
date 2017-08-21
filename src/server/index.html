@@ -8,27 +8,76 @@
     <script src="/vue-resource.js"></script>
     <link rel="stylesheet" href="/index.css">
     <script src="/index.js"></script>
+    <style>
+        .row-def{
+            margin-top: 20px
+        }
+        .player-box {
+            /* border: 2px solid #20a0ff; */
+            position: relative;
+            margin-top: 20px;
+            background-color: #ededed;
+        }
+        .player-box .title{
+            margin: 10px
+        }
+
+        .board-box {
+            border: 1px solid #a9a7a7;
+            display: inline-block;
+            position: relative;
+            width: 30px;
+            margin: 10px;
+        }
+
+        .board-box span {
+            margin: 5px;
+        }
+    </style>
 </head>
 
 <body>
     <div id="app">
         <el-button type="primary" @click="test">开始</el-button>
+        <el-row class="row-def">
+            <div v-for="player in players" class="player-box">
+                <div class="title">{{player.id}}</div>
+                <div v-for="board in player.boards" class="board-box">
+                    <span>{{board.value}}</span>
+                    <span>{{board.suit}}</span>
+                </div>
+            </div>
+        </el-row>
+        <el-row class="row-def">
+            <div class="player-box" v-if="player_four.length>0">
+                <div class="title">剩下</div>
+                <div v-for="board in player_four" class="board-box">
+                    <span>{{board.value}}</span>
+                    <span>{{board.suit}}</span>
+                </div>
+            </div>
+        </el-row>
     </div>
-    
+
     <script>
         var app = new Vue({
             el: '#app',
             data: {
-                message: 'Hello Vue!'
+                player_four: [],
+                players: []
             },
             methods: {
-                test:function(){
-                    // this.$http.get('/rt', [options]).then((response) => {
-                    //     debugger;
-                    //     // 响应成功回调
-                    // }, (response) => {
-                    //     // 响应错误回调
-                    // });
+                test: function () {
+                    Vue.http.get('/rt').then((response) => {
+                        if (response && response.body && response.body.data) {
+                            let data = response.body.data;
+                            this.player_four = data.player_four;
+                            this.players = data.players;
+                        }
+                        // 响应成功回调
+                    }, (response) => {
+                        // 响应错误回调
+                    });
                 }
             }
         });

@@ -138,10 +138,10 @@ export class ManService {
                 console.log(`值：${bo.value},花色：${bo.suit}`);
             })
             // FileUtil.deleteFolder(config.processedImagePath);
-            return [{
-                value: 1,
-                suit: 0
-            }]
+            return {
+                    players: players,
+                    player_four: boardsPooling
+                }
         });
     }
 

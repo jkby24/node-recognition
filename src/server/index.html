@@ -44,7 +44,7 @@
                 <div class="title">{{player.id}}</div>
                 <div v-for="board in player.boards" class="board-box">
                     <span>{{board.value}}</span>
-                    <span>{{board.suit}}</span>
+                    <img v-bind:src="'/boards/'+board.suit"/> 
                 </div>
             </div>
         </el-row>
@@ -53,7 +53,7 @@
                 <div class="title">剩下</div>
                 <div v-for="board in player_four" class="board-box">
                     <span>{{board.value}}</span>
-                    <span>{{board.suit}}</span>
+                    <img v-bind:src="'/boards/'+board.suit"/> 
                 </div>
             </div>
         </el-row>

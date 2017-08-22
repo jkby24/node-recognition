@@ -23,6 +23,9 @@ export class Server {
         app.get('/index.css', function (req, res) {
             res.sendFile(__dirname + "/resource/" + "index.css");
         });
+        app.get("/boards/:suit", function(req, res) {
+            res.sendFile(__dirname + "/resource/boards/"+ req.params.suit + ".png");
+        });
         let server = app.listen(8081, function () {
 
             var host = server.address().address

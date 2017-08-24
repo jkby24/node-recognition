@@ -6,9 +6,9 @@
 // });
 
 //正式代码
-import {Server} from './server/server.js';
-let server = new Server();
-server.init();
+// import {Server} from './server/server.js';
+// let server = new Server();
+// server.init();
 
 
 
@@ -34,3 +34,17 @@ server.init();
 // },function(result){
 //     console.log(result);
 // });
+
+import fs from 'fs';
+import config from './config.js';
+
+import adb from 'adbkit';
+let client = adb.createClient();
+client.listDevices()
+  .then(function(devices) {
+        devices.forEach(function(device) {
+            client.screencap(device.id).then(function(err,stream) {
+                fs.writeFileSync('screenshot.png', stream) // Synchronous - bad!
+            });
+        })
+  })

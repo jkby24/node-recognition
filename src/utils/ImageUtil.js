@@ -29,6 +29,22 @@ export default class {
         })
     }
 
+    static append(inputPaths, outPath){
+        return new Promise((resolve, reject) =>{ 
+            inputPaths.push('-append');
+            inputPaths.push(outPath);
+            im.convert(inputPaths, 
+                function(err, stdout){
+                    if (err) throw err;
+                    resolve();
+            });
+        })
+    }
+
+    //im_convert 2.png 1.png 3.png 4.png 5.png -append 0.png
+    //im_convert t.png -brightness-contrast 0,95 1.png
+
+
     static isDiff(imageAPath,imageBPath,threshold = 0.04,outputPath){
         return new Promise(function(resolve, reject) {
             var diff = new BlinkDiff({
@@ -59,6 +75,29 @@ export default class {
                         value = '10';
                     };
                     resolve(value);
+                })
+        })
+    }
+    static getValues(path){
+        return new Promise((resolve, reject) =>{ 
+            Tesseract.recognize(path)
+                .then(function(result){
+                    let defaultV = ['A','K','Q','J','9','8','7','6','5','4','3','2','1'] 
+                    let text = result.text.replace('\n\n','');
+                    let values = [];
+                    let orValue = text.split('\n');
+                    console.log(orValue);
+                    orValue.forEach(value=>{
+                        if(defaultV.indexOf(value)===-1){
+                            if(value=='ID'){
+                                value = '10';
+                            }else{
+                                value = 'Q';
+                            }
+                        }
+                        values.push(value);
+                    })
+                    resolve(values);
                 })
         })
     }

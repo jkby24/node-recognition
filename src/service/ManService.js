@@ -35,61 +35,18 @@ export class ManService {
     }
 
     recognition() {
+        // FileUtil.deleteFolder(config.originalImagePath);
+        // FileUtil.mkdir(config.originalImagePath);
+        FileUtil.deleteFolder(config.processedImagePath);
+        FileUtil.mkdir(config.processedImagePath);
 
-        /** players = [{
-         *      id:'1',
-         *      boards:[{
-         *          value : '',
-         *          suit : ''
-         *      }]
-         * }]
-         * 
-         *  发送adb命令截图保存到original目录下,根据设备名来保存
-         * 
-         *  files = 遍历original目录
-         * 
-         * files.forEach(file=>{
-         *    fileItem = {
-         *          id:file.name,
-         *          boards:[]
-         *      }
-         *      
-         *    rFile = 把图片统一缩小为指定尺寸到resize目录下
-         *    boards = 把rFile截取为一张张小图
-         *    boards.forEach(board =>{
-         *           infoFiles = board 对半截图
-         *           value = 获取牌值(infoFiles[0])
-         *           suit = 获取花色(infoFiles[1])
-         *          fileItem.boards.push({
-         *              value :value,
-         *              suit : suit
-         *          })
-         *      })
-         *    清理目录
-         *    boardsPooling = [{}]  
-         *    remainPlayerBoards = []; 
-         *    根据三家牌算出第四个牌
-         *    players.forEach(player=>{
-         *          
-         *      })
-         * })
-         * 
-         * 
-         * 
-         * 
-         * 
-         */
-        if (!fs.existsSync(config.originalImagePath)) {
-            return;
-        }
+
         let files = fs.readdirSync(config.originalImagePath);
         if (!files || files.length === 0) {
             return;
         }
         let players = [];
         let promises = [];
-        FileUtil.deleteFolder(config.processedImagePath);
-        FileUtil.mkdir(config.processedImagePath);
         files.forEach((file, index) => {
             if(file.indexOf('.DS_Store')!=-1){
                 return;
@@ -105,7 +62,6 @@ export class ManService {
         }, this);
 
         return Promise.all(promises).then((data) => {
-            console.log(players);
             let remainPlayerBoards = []; 
 
             let values = ['A','K','Q','J','10','9','8','7','6','5','4','3','2'],
@@ -119,7 +75,6 @@ export class ManService {
                     })
                 })
             });
-            console.log(JSON.stringify(players));
             players.forEach((player)=>{
                 player.boards.forEach(board=>{
                     let index = boardsPooling.findIndex(bt => { 
@@ -156,6 +111,7 @@ export class ManService {
             boards: []
         }
         let promises = [];
+        let boardsTemp = [];
         // for (let i = 0; i < 8; i++) {
         for (let i = 0; i < this.ogInfo.total; i++) {
             let vPoint = {
@@ -172,28 +128,51 @@ export class ManService {
             // ImageUtil.cut(resizePath, vFile, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height);
             ImageUtil.cutAndResize(resizePath, vFileTemp, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height,300,300);
             ImageUtil.cut(resizePath, bFile, bPoint.x, bPoint.y, this.ogInfo.boardI.width, this.ogInfo.boardI.height);
-            promises.push(new Promise((resolve) => {
-                return this.boardCp(bFile).then((suit) => {
-                    return ImageUtil.contrast(vFileTemp,vFile).then(()=>{
-                        this.valueByTesseract(vFile).then((value)=>{
-                            console.log(`值：${value},花色：${suit}`);
-                            itemInfo.boards.push({
-                                value: value,
-                                suit: suit
-                            });
-                            resolve();
+            promises.push(()=>{
+                return new Promise((resolve) => {
+                    return this.boardCp(bFile).then((suit) => {
+                        boardsTemp.push({
+                            suit: suit,
+                            vFile: vFileTemp
                         });
+                        resolve();
                     })
                 })
-            }));
+            });
         }
-        return Promise.all(promises).then(() => {
-            return itemInfo;
+        
+        return this.sequenceExecutePromise(promises).then(() => {
+            return new Promise((resolve)=>{
+                var files = [];
+                boardsTemp.forEach(board=>{
+                    files.push(board.vFile);
+                    files.push(path.join(config.testImagePath, `blank${suffix}`));
+                });
+                let appendFileTemp = path.join(config.processedImagePath, `${id}_append_t${suffix}`);
+                let appendFile = path.join(config.processedImagePath, `${id}_append${suffix}`);
+                ImageUtil.append(files,appendFileTemp).then(()=>{
+                    ImageUtil.contrast(appendFileTemp,appendFile).then(()=>{
+                        this.valuesByTesseract(appendFile).then((values)=>{
+                            boardsTemp.forEach((board,i)=>{
+                                console.log(`值：${values[i]},花色：${board.suit}`);
+                                itemInfo.boards.push({
+                                    value: values[i],
+                                    suit: board.suit
+                                });
+                            });
+                            resolve(itemInfo);
+                        });
+                    });
+                })
+            });
         });
     }
 
     valueByTesseract(file){
         return ImageUtil.getValue(file);
+    }
+    valuesByTesseract(file){
+        return ImageUtil.getValues(file);
     }
 
     valueByDiff(file){

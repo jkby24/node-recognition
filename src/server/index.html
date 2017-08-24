@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/resource/index.css">
     <script src="/resource/index.js"></script>
     <script src="/resource/lodash.js"></script>
+    <script src="/tesseract/tesseract.js"></script>
     <style>
         .row-def {
             margin-top: 20px
@@ -32,6 +33,10 @@
             width: 30px;
             margin: 10px;
         }
+        .error{
+            border: 1px solid #e02323;
+            background-color: #d76e36;
+        }
 
         .board-box span {
             margin: 5px;
@@ -41,31 +46,27 @@
 
 <body>
     <div id="app">
-        
+
         <el-row class="row-def">
             <el-input style="width: 180px;" v-model="input" placeholder="请输入安全码"></el-input>
-            <el-button
-                type="primary"
-                @click="rt"
-                element-loading-text="解析中"
-                v-loading.fullscreen.lock="fullscreenLoading">
+            <el-button type="primary" @click="rt" element-loading-text="解析中" v-loading.fullscreen.lock="fullscreenLoading">
                 开始
             </el-button>
         </el-row>
         <el-row class="row-def">
             <template>
                 <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
-                    <el-tab-pane label="用户管理" name="first"></el-tab-pane>
-                    <el-tab-pane label="配置管理" name="second"></el-tab-pane>
+                    <el-tab-pane label="牌面" name="first"></el-tab-pane>
+                    <el-tab-pane label="花色" name="second"></el-tab-pane>
                 </el-tabs>
             </template>
         </el-row>
         <el-row class="row-def">
             <div v-for="player in players" class="player-box">
                 <div class="title">{{player.id}}</div>
-                <div v-for="board in player.boards" class="board-box">
+                <div v-for="(board,index) in player.boards" class="board-box" v-bind:class="{ 'error': board.value != vd[player.id][index] }">
                     <span>{{board.value}}</span>
-                     <img v-bind:src="'/boards/'+board.suit"/>   
+                     <img v-bind:src="'/boards/'+board.suit" /> 
                 </div>
             </div>
         </el-row>
@@ -74,13 +75,18 @@
                 <div class="title">剩下</div>
                 <div v-for="board in player_four" class="board-box">
                     <span>{{board.value}}</span>
-                     <img v-bind:src="'/boards/'+board.suit"/>   
+                     <img v-bind:src="'/boards/'+board.suit" /> 
                 </div>
             </div>
         </el-row>
     </div>
 
     <script>
+        window.Tesseract = Tesseract.create({
+            workerPath: 'http://localhost:8081/tesseract/worker.js',
+            // langPath: 'http://localhost:8081/tesseract/',
+            corePath: 'http://localhost:8081/tesseract/index.js',
+        })
         var constv = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
         var app = new Vue({
             el: '#app',
@@ -89,7 +95,13 @@
                 players: [],
                 activeName: 'first',
                 input: '',
-                fullscreenLoading: false
+                fullscreenLoading: false,
+                vd : {
+                    'T2_2'   :['Q','Q', 'J', '9', '9', '8', '7', '7', '5', '4', '3', '3', '2' ],
+                    'C2_0'   :['A', 'A', 'K', 'Q', 'J', 'J', '10', '10', '9', '6', '6', '5', '4'], 
+                    'R2_1'   :['A', 'A', 'K', 'Q', '10', '8', '8', '7', '6', '5', '3', '2', '2']
+        // s   K K J 10 9 8 7 6 5 4 4 3 2
+                }
             },
             methods: {
                 sortByValue(boards) {
@@ -131,23 +143,108 @@
                             break;
                     }
                 },
+                getPlayers(info) {
+                    return new Promise((resolve) =>{
+                        let players = [];
+                        let promises = [];
+                        info.forEach(playerT => {
+                            let boardsInfo = playerT.boards;
+                            let boards = [];
+                            promises.push(Tesseract.recognize('http://localhost:8081/file/' + boardsInfo.file).then(
+                                data => {
+                                    let defaultV = ['A', 'K', 'Q', 'J', '9', '8', '7', '6', '5',
+                                        '4', '3', '2'
+                                    ];
+                                    let text = data.text.replace('\n\n', '');
+                                    let values = [];
+                                    let orValue = text.split('\n');
+                                    console.log(orValue);
+                                    orValue.forEach((value, i) => {
+                                        if (defaultV.indexOf(value) === -1) {
+                                            if(value=='0'){
+                                                value = 'Q';
+                                            }else{
+                                                value = '10';
+                                            }
+                                            
+                                        }
+                                        values.push(value);
+                                        boards.push({
+                                            value: value,
+                                            suit: boardsInfo.suits[i]
+                                        })
+                                    })
+                                    players.push({
+                                        id:playerT.id,
+                                        boards:boards
+                                    });
+                                })
+                            );
+                        })
+                        return Promise.all(promises).then(()=>{
+                            resolve(players);
+                        })
+                    })
+                },
+                getPlayerFour(players) {
+                    let remainPlayerBoards = [];
+
+                    let values = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'],
+                        suits = [0, 1, 2, 3];
+                    let boardsPooling = [];
+                    values.forEach(value => {
+                        suits.forEach(suit => {
+                            boardsPooling.push({
+                                value: value,
+                                suit: suit
+                            })
+                        })
+                    });
+                    players.forEach((player) => {
+                        player.boards.forEach(board => {
+                            let index = boardsPooling.findIndex(bt => {
+                                return board.value == bt.value && board.suit == bt.suit;
+                            });
+                            if (index != -1) {
+                                boardsPooling.splice(index, 1);
+                            } else {
+                                // console.log(`未找到值：${board.value},花色：${board.suit}`)
+                            }
+                        })
+                    });
+
+                    // console.log('剩下：')
+                    // boardsPooling.forEach(bo => {
+                    //     console.log(`值：${bo.value},花色：${bo.suit}`);
+                    // })
+                    return boardsPooling;
+                },
                 rt: function () {
+                    // Tesseract.recognize('http://localhost:8081/file/R2_1_append.png').then(data=>{
+                    //         console.log(data.text);
+                    //     })
+
                     this.fullscreenLoading = true;
                     Vue.http.get('/rt?pw=' + this.input).then((response) => {
                         if (response && response.body && response.body.data) {
                             let data = response.body.data;
-                            this.player_four = data.player_four;
-                            this.players = data.players;
-                            this.handleClick();
+                            this.getPlayers(data.players).then(data => {
+                                this.players = data;
+                                this.player_four = this.getPlayerFour(this.players);
+                                this.fullscreenLoading = false;
+                            });
+                            // this.player_four = data.player_four;
+                            // this.players = data.players;
+                            // this.player_four = getPlayerFour(this.players);
+                            // this.handleClick();
                         } else {
                             this.$message({
                                 showClose: true,
                                 message: response.body.error,
                                 type: 'error'
                             });
+                            this.fullscreenLoading = false;
                         }
-                        this.fullscreenLoading = false;
-                        // 响应成功回调
                     }, (response) => {
                         // 响应错误回调
                         this.fullscreenLoading = false;

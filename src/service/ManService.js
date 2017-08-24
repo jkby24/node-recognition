@@ -48,7 +48,7 @@ export class ManService {
         let players = [];
         let promises = [];
         files.forEach((file, index) => {
-            if(file.indexOf('.DS_Store')!=-1){
+            if (file.indexOf('.DS_Store') != -1) {
                 return;
             }
             console.log(`开始解析${file}`);
@@ -62,43 +62,14 @@ export class ManService {
         }, this);
 
         return Promise.all(promises).then((data) => {
-            let remainPlayerBoards = []; 
-
-            let values = ['A','K','Q','J','10','9','8','7','6','5','4','3','2'],
-                suits = [0,1,2,3];    
-            let boardsPooling = [];
-            values.forEach(value=>{
-                suits.forEach(suit=>{
-                    boardsPooling.push({
-                        value: value,
-                        suit: suit
-                    })
-                })
-            });
-            players.forEach((player)=>{
-                player.boards.forEach(board=>{
-                    let index = boardsPooling.findIndex(bt => { 
-                        return board.value == bt.value && board.suit == bt.suit; 
-                    });
-                    if(index!=-1){
-                        boardsPooling.splice(index,1);
-                    }else{
-                        console.log(`未找到值：${board.value},花色：${board.suit}`)
-                    }
-                })
-            });
-
-            console.log('剩下：')
-            boardsPooling.forEach(bo =>{
-                console.log(`值：${bo.value},花色：${bo.suit}`);
-            })
             // FileUtil.deleteFolder(config.processedImagePath);
             return {
-                    players: players,
-                    player_four: boardsPooling
-                }
+                players: players
+                // player_four: boardsPooling
+            }
         });
     }
+
 
     fileProcess(file, index) {
         let suffix = '.png';
@@ -126,9 +97,9 @@ export class ManService {
                 vFile = path.join(config.processedImagePath, `${id}_${i}_v${suffix}`),
                 bFile = path.join(config.processedImagePath, `${id}_${i}_b${suffix}`);
             // ImageUtil.cut(resizePath, vFile, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height);
-            ImageUtil.cutAndResize(resizePath, vFileTemp, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height,300,300);
+            ImageUtil.cutAndResize(resizePath, vFileTemp, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height, 300, 300);
             ImageUtil.cut(resizePath, bFile, bPoint.x, bPoint.y, this.ogInfo.boardI.width, this.ogInfo.boardI.height);
-            promises.push(()=>{
+            promises.push(() => {
                 return new Promise((resolve) => {
                     return this.boardCp(bFile).then((suit) => {
                         boardsTemp.push({
@@ -140,52 +111,62 @@ export class ManService {
                 })
             });
         }
-        
+
         return this.sequenceExecutePromise(promises).then(() => {
-            return new Promise((resolve)=>{
-                var files = [];
-                boardsTemp.forEach(board=>{
+            return new Promise((resolve) => {
+                let files = [];
+                let suits = [];
+                boardsTemp.forEach(board => {
+                    suits.push(board.suit)
                     files.push(board.vFile);
                     files.push(path.join(config.testImagePath, `blank${suffix}`));
                 });
                 let appendFileTemp = path.join(config.processedImagePath, `${id}_append_t${suffix}`);
-                let appendFile = path.join(config.processedImagePath, `${id}_append${suffix}`);
-                ImageUtil.append(files,appendFileTemp).then(()=>{
-                    ImageUtil.contrast(appendFileTemp,appendFile).then(()=>{
-                        this.valuesByTesseract(appendFile).then((values)=>{
-                            boardsTemp.forEach((board,i)=>{
-                                console.log(`值：${values[i]},花色：${board.suit}`);
-                                itemInfo.boards.push({
-                                    value: values[i],
-                                    suit: board.suit
-                                });
-                            });
-                            resolve(itemInfo);
+                let appendFileName = `${id}_append${suffix}`;
+                let appendFile = path.join(config.processedImagePath, appendFileName);
+                ImageUtil.append(files, appendFileTemp).then(() => {
+                    ImageUtil.contrast(appendFileTemp, appendFile).then(() => {
+                        resolve({
+                            id: id,
+                            boards: {
+                                suits: suits,
+                                file: appendFileName
+                            }
                         });
+                        // this.valuesByTesseract(appendFile).then((values)=>{
+                        //     boardsTemp.forEach((board,i)=>{
+                        //         console.log(`值：${values[i]},花色：${board.suit}`);
+                        //         itemInfo.boards.push({
+                        //             value: values[i],
+                        //             suit: board.suit
+                        //         });
+                        //     });
+                        //     resolve(itemInfo);
+                        // });
                     });
                 })
             });
         });
     }
 
-    valueByTesseract(file){
+    valueByTesseract(file) {
         return ImageUtil.getValue(file);
     }
-    valuesByTesseract(file){
+    valuesByTesseract(file) {
         return ImageUtil.getValues(file);
     }
 
-    valueByDiff(file){
+    valueByDiff(file) {
         let values = fs.readdirSync(config.valuesMImagePath);
         if (!values) {
             throw new Error('config.valuesImagePath目录空');
         }
-        
+
         let resultValue;
         let promises = [];
         values.forEach(value => {
             promises.push(() => {
-                return ImageUtil.isDiff(file, path.join(config.valuesMImagePath, value),0.5).then(isDiff => {
+                return ImageUtil.isDiff(file, path.join(config.valuesMImagePath, value), 0.5).then(isDiff => {
                     if (!isDiff) {
                         resultValue = value.split('.')[0];
                     }
@@ -196,12 +177,12 @@ export class ManService {
         return this.sequenceExecutePromise(promises).then(() => {
             if (!resultValue) {
                 console.log(`解析牌值文件${file}失败`);
-            }else{
+            } else {
                 console.log(`解析牌值文件${file}成功：${resultValue}`);
             }
             return resultValue;
         });
-    } 
+    }
 
     boardCp(file) {
         let boards = fs.readdirSync(config.boardsImagePath);

@@ -21,7 +21,7 @@ export default class {
 
     static contrast(inputPath, outPath){
         return new Promise((resolve, reject) =>{ 
-            im.convert([inputPath, '-brightness-contrast', '0,90', outPath], 
+            im.convert([inputPath, '-brightness-contrast', '0,92', outPath], 
                 function(err, stdout){
                     if (err) throw err;
                     resolve();
@@ -31,6 +31,9 @@ export default class {
 
     static append(inputPaths, outPath){
         return new Promise((resolve, reject) =>{ 
+            // inputPaths.push('-monochrome');
+            // inputPaths.push('-threshold');
+            // inputPaths.push('40%');
             inputPaths.push('-append');
             inputPaths.push(outPath);
             im.convert(inputPaths, 
@@ -69,7 +72,7 @@ export default class {
         return new Promise((resolve, reject) =>{ 
             Tesseract.recognize(path)
                 .then(function(result){
-                    let defaultV = ['A','K','Q','J','9','8','7','6','5','4','3','2','1'] 
+                    let defaultV = ['A','K','Q','J','9','8','7','6','5','4','3','2']; 
                     let value = result.text.replace('\n\n','');
                     if(defaultV.indexOf(value)===-1){
                         value = '10';
@@ -82,7 +85,7 @@ export default class {
         return new Promise((resolve, reject) =>{ 
             Tesseract.recognize(path)
                 .then(function(result){
-                    let defaultV = ['A','K','Q','J','9','8','7','6','5','4','3','2','1'] 
+                    let defaultV = ['A','K','Q','J','9','8','7','6','5','4','3','2'];
                     let text = result.text.replace('\n\n','');
                     let values = [];
                     let orValue = text.split('\n');

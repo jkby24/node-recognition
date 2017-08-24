@@ -1,0 +1,15 @@
+<script src="/tesseract/tesseract.js"></script>
+<script>
+window.Tesseract = Tesseract.create({
+	workerPath: 'http://localhost:8081/tesseract/worker.js',
+	langPath: 'http://localhost:8081/tesseract/',
+	corePath: 'http://localhost:8081/tesseract/index.js',
+})
+function recognizeFile(file){
+	Tesseract.recognize(file)
+		.then(function(data){
+			console.log(data)
+		})
+}
+</script>
+<button onclick="recognizeFile('http://localhost:8081/tesseract/y2.png')">Sample Image</button>

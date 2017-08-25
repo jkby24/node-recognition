@@ -35,39 +35,44 @@ export class ManService {
     }
 
     recognition() {
-        // FileUtil.deleteFolder(config.originalImagePath);
-        // FileUtil.mkdir(config.originalImagePath);
+        FileUtil.deleteFolder(config.originalImagePath);
+        FileUtil.mkdir(config.originalImagePath);
         FileUtil.deleteFolder(config.processedImagePath);
         FileUtil.mkdir(config.processedImagePath);
 
-
-        let files = fs.readdirSync(config.originalImagePath);
-        if (!files || files.length === 0) {
-            return;
-        }
-        let players = [];
-        let promises = [];
-        files.forEach((file, index) => {
-            if (file.indexOf('.DS_Store') != -1) {
-                return;
+        return ImageUtil.screencap().then(() => {
+            let files = fs.readdirSync(config.originalImagePath);
+            if (!files || files.length === 0) {
+                return Promise.resolve();
             }
-            console.log(`开始解析${file}`);
+            let players = [];
+            let promises = [];
+
             promises.push((() => {
-                return this.fileProcess(file, index).then((info) => {
-                    players.push(info);
-                    console.log(`${file}解析完成`);
-                    return;
-                })
+                return ImageUtil.screencap();
             })());
-        }, this);
 
-        return Promise.all(promises).then((data) => {
-            // FileUtil.deleteFolder(config.processedImagePath);
-            return {
-                players: players
-                // player_four: boardsPooling
-            }
-        });
+            files.forEach((file, index) => {
+                if (file.indexOf('.DS_Store') != -1) {
+                    return;
+                }
+                console.log(`开始解析${file}`);
+                promises.push((() => {
+                    return this.fileProcess(file, index).then((info) => {
+                        players.push(info);
+                        console.log(`${file}解析完成`);
+                        return;
+                    })
+                })());
+            }, this);
+
+            return Promise.all(promises).then((data) => {
+                return {
+                    players: players
+                    // player_four: boardsPooling
+                }
+            });
+        })
     }
 
 
@@ -75,15 +80,23 @@ export class ManService {
         let suffix = '.png';
         let id = `${file.split('.')[0]}_${index}`;
         let iPath = path.join(config.originalImagePath, file),
+            rotatePath = path.join(config.processedImagePath, `${id}_r${suffix}`),
             resizePath = path.join(config.processedImagePath, `${id}${suffix}`);
-        ImageUtil.resize(iPath, resizePath, this.ogInfo.width, this.ogInfo.height);
+
         let itemInfo = {
             id: id,
             boards: []
         }
         let promises = [];
         let boardsTemp = [];
-        // for (let i = 0; i < 8; i++) {
+        promises.push(() => {
+            return new Promise((resolve) => {
+                return ImageUtil.rotate(iPath, rotatePath).then(() => {
+                    ImageUtil.resize(rotatePath, resizePath, this.ogInfo.width, this.ogInfo.height);
+                    resolve();
+                })
+            })
+        });
         for (let i = 0; i < this.ogInfo.total; i++) {
             let vPoint = {
                     x: this.ogInfo.fvPoint.x + this.ogInfo.spacing * i + (i >= 9 ? 2 : 0),
@@ -96,11 +109,11 @@ export class ManService {
             let vFileTemp = path.join(config.processedImagePath, `${id}_${i}_v_temp${suffix}`),
                 vFile = path.join(config.processedImagePath, `${id}_${i}_v${suffix}`),
                 bFile = path.join(config.processedImagePath, `${id}_${i}_b${suffix}`);
-            // ImageUtil.cut(resizePath, vFile, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height);
-            ImageUtil.cutAndResize(resizePath, vFileTemp, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height, 300, 300);
-            ImageUtil.cut(resizePath, bFile, bPoint.x, bPoint.y, this.ogInfo.boardI.width, this.ogInfo.boardI.height);
+            
             promises.push(() => {
                 return new Promise((resolve) => {
+                    ImageUtil.cutAndResize(resizePath, vFileTemp, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height, 300, 300);
+                    ImageUtil.cut(resizePath, bFile, bPoint.x, bPoint.y, this.ogInfo.boardI.width, this.ogInfo.boardI.height);
                     return this.boardCp(bFile).then((suit) => {
                         boardsTemp.push({
                             suit: suit,

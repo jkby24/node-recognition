@@ -37,6 +37,9 @@
             border: 1px solid #e02323;
             background-color: #d76e36;
         }
+        .ogimg{
+            width: 500px
+        }
 
         .board-box span {
             margin: 5px;
@@ -54,17 +57,20 @@
             </el-button>
         </el-row>
         <el-row class="row-def">
-            <template>
-                <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
-                    <el-tab-pane label="牌面" name="first"></el-tab-pane>
-                    <el-tab-pane label="花色" name="second"></el-tab-pane>
-                </el-tabs>
-            </template>
+            <el-checkbox v-model="checked">显示屏幕图</el-checkbox>
+        </el-row>
+        <el-row class="row-def">
+            <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
+                <el-tab-pane label="牌面" name="first"></el-tab-pane>
+                <el-tab-pane label="花色" name="second"></el-tab-pane>
+            </el-tabs>
         </el-row>
         <el-row class="row-def">
             <div v-for="player in players" class="player-box">
+                <img class="ogimg" v-show="checked" v-bind:src="'/file/'+player.id+'.png'" /> 
                 <div class="title">{{player.id}}</div>
-                <div v-for="(board,index) in player.boards" class="board-box" v-bind:class="{ 'error': board.value != vd[player.id][index] }">
+                <!-- <div v-for="(board,index) in player.boards" class="board-box" v-bind:class="{ 'error': board.value != vd[player.id][index] }"> -->
+                <div v-for="(board,index) in player.boards" class="board-box">
                     <span>{{board.value}}</span>
                      <img v-bind:src="'/boards/'+board.suit" /> 
                 </div>
@@ -84,7 +90,7 @@
     <script>
         window.Tesseract = Tesseract.create({
             workerPath: 'http://localhost:8081/tesseract/worker.js',
-            // langPath: 'http://localhost:8081/tesseract/',
+            langPath: 'http://localhost:8081/tesseract/',
             corePath: 'http://localhost:8081/tesseract/index.js',
         })
         var constv = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
@@ -96,6 +102,7 @@
                 activeName: 'first',
                 input: '',
                 fullscreenLoading: false,
+                checked: true,
                 vd : {
                     'T2_2'   :['Q','Q', 'J', '9', '9', '8', '7', '7', '5', '4', '3', '3', '2' ],
                     'C2_0'   :['A', 'A', 'K', 'Q', 'J', 'J', '10', '10', '9', '6', '6', '5', '4'], 

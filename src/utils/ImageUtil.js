@@ -5,7 +5,11 @@ import images from 'images';
 import BlinkDiff from 'blink-diff';
 import Tesseract from 'tesseract.js';
 // import im from 'imagemagick';
+import adb from 'adbkit';
 import im from '../libs/imagemagick.js';
+import path from 'path';
+import config from '../config.js';
+import fs from 'fs';
 export default class {
     static resize(inputPath, outPath, width, height) {
         images(inputPath).resize(width, height).save(outPath);
@@ -89,7 +93,6 @@ export default class {
                     let text = result.text.replace('\n\n','');
                     let values = [];
                     let orValue = text.split('\n');
-                    console.log(orValue);
                     orValue.forEach(value=>{
                         if(defaultV.indexOf(value)===-1){
                             if(value=='ID'){
@@ -103,5 +106,25 @@ export default class {
                     resolve(values);
                 })
         })
+    }
+    static screencap(){
+        let client = adb.createClient();
+        return client.listDevices()
+            .then(function (devices) {
+                devices.forEach(function (device) {
+                    client.screencap(device.id).then(stream=> {
+                        let chunks = [];
+                        stream.on('data', chunk => {
+                            chunks.push(chunk);
+                        });
+                        stream.on('end', () => {
+                            var buffer = new Buffer.concat(chunks);
+                            var out = fs.createWriteStream(path.join(config.originalImagePath, device.id+'.png'));
+                            out.write(buffer);
+                            out.end();
+                        });
+                    });
+                })
+            })
     }
 }

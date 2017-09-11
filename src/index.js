@@ -8,11 +8,48 @@
 import {Server} from './server/server.js';
 let server = new Server();
 server.init();
+// import fs from 'fs';
+// import config from './config.js';
+// import path from 'path';
+// import ImageUtil from './utils/ImageUtil.js';
+// ImageUtil.isDiff(path.join(config.testImagePath, 't2_c1_0_11_b.png'), path.join(config.testImagePath, '13.png'),0.01,path.join(config.testImagePath, 'tt2.png')).then(isDiff => {
+//     if (!isDiff) {
+//         console.log('成功');
+//     }
+//     return result;
+// });
+// // function sequenceExecutePromise(promises) {
+// //     var result = Promise.resolve();
+// //     promises.forEach((promise) => {
+// //         result = result.then(promise);
+// //     });
+// //     return result;
+// // }
 
+// let file = path.join(config.processedImagePath, 't2_c1_0_11_b.png');
+// let boards = fs.readdirSync(config.boardsImagePath);
+// let result;
+// let promises = [];
+// console.time('总时间')
+// console.log(boards);
+// boards.forEach(boad => {
+//     // promises.push(() => {
+//         console.log(boad);
+//         ImageUtil.isDiff(file, path.join(config.boardsImagePath, boad)).then(isDiff => {
+//             if (!isDiff) {
+//                 console.log('找到:'+boad);
+//                 console.timeEnd('总时间')
+//                 result = boad.split('.')[0];
+//             }
+//             // return result;
+//         })
+//     // })
+// });
 
-
-
-
+// sequenceExecutePromise(promises).then(() => {
+//     console.log(`结果${result}`)
+//     return result;
+// });
 
 
 // import config from './config.js';

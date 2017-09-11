@@ -60,7 +60,6 @@ export default class {
     //im_convert 2.png 1.png 3.png 4.png 5.png -append 0.png
     //im_convert t.png -brightness-contrast 0,95 1.png
 
-
     static isDiff(imageAPath, imageBPath, threshold = 0.04, outputPath) {
         return new Promise(function (resolve, reject) {
             var diff = new BlinkDiff({
@@ -117,27 +116,28 @@ export default class {
         })
     }
     static screencap() {
-        let client = adb.createClient();
-        return client.listDevices().then(function (devices) {
-            let promises = [];
-            devices.forEach((device) => {
-                promises.push(new Promise(resolve => {
-                    client.screencap(device.id).then(stream => {
-                        let chunks = [];
-                        stream.on('data', chunk => {
-                            chunks.push(chunk);
-                        });
-                        stream.on('end', () => {
-                            var buffer = new Buffer.concat(chunks);
-                            var out = fs.createWriteStream(path.join(config.originalImagePath, device.id + '.png'));
-                            out.write(buffer);
-                            out.end();
-                            resolve();
-                        });
-                    });
-                }));
-            });
-            return Promise.all(promises);
-        })
+        return Promise.resolve();
+        // let client = adb.createClient();
+        // return client.listDevices().then(function (devices) {
+        //     let promises = [];
+        //     devices.forEach((device) => {
+        //         promises.push(new Promise(resolve => {
+        //             client.screencap(device.id).then(stream => {
+        //                 let chunks = [];
+        //                 stream.on('data', chunk => {
+        //                     chunks.push(chunk);
+        //                 });
+        //                 stream.on('end', () => {
+        //                     var buffer = new Buffer.concat(chunks);
+        //                     var out = fs.createWriteStream(path.join(config.originalImagePath, device.id + '.png'));
+        //                     out.write(buffer);
+        //                     out.end();
+        //                     resolve();
+        //                 });
+        //             });
+        //         }));
+        //     });
+        //     return Promise.all(promises);
+        // })
     }
 }

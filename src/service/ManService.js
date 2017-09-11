@@ -10,33 +10,62 @@ import FileUtil from '../utils/FileUtil.js';
 // import BoardsConst from '../utils/BoardsConst.js';
 export class ManService {
     constructor() {
+        // this.ogInfo = {
+        //     width: 1280,
+        //     height: 720,
+        //     fvPoint: {
+        //         x: 20,
+        //         y: 570
+        //     },
+        //     fbPoint: {
+        //         x: 20,
+        //         y: 612
+        //     },
+        //     spacing: 95,
+        //     valueI: {
+        //         width: 32,
+        //         height: 42
+        //     },
+        //     boardI: {
+        //         width: 30,
+        //         height: 28
+        //     },
+        //     total: 13
+        // };
+        // this.ogInfo = {
+        //     total: 13,
+        //     firstPoint:{
+        //         x: 75,
+        //         y: 20
+        //     },
+        //     suitInfo: {
+        //         width: 30,
+        //         height: 30
+        //     },
+        //     boardInfo:{
+        //         width: 75,
+        //         height: 30
+        //     },
+        //     spacing: 95,
+        // };
+        let xt = 1.725;
         this.ogInfo = {
-            width: 1280,
-            height: 720,
-            fvPoint: {
-                x: 20,
-                y: 570
+            total: 13,
+            firstPoint:{
+                x: 75 * xt,
+                y: 20 * xt
             },
-            fbPoint: {
-                x: 20,
-                y: 612
+            boardInfo:{
+                width: 75 * xt,
+                height: 30 * xt
             },
-            spacing: 95,
-            valueI: {
-                width: 32,
-                height: 42
-            },
-            boardI: {
-                width: 30,
-                height: 28
-            },
-            total: 13
+            spacing: 95 * xt,
         };
     }
 
     recognition() {
-        FileUtil.deleteFolder(config.originalImagePath);
-        FileUtil.mkdir(config.originalImagePath);
+        // FileUtil.deleteFolder(config.originalImagePath);
+        // FileUtil.mkdir(config.originalImagePath);
         FileUtil.deleteFolder(config.processedImagePath);
         FileUtil.mkdir(config.processedImagePath);
 
@@ -56,11 +85,11 @@ export class ManService {
                 if (file.indexOf('.DS_Store') != -1) {
                     return;
                 }
-                console.log(`开始解析${file}`);
+                console.time(`解析文件`);
                 promises.push((() => {
-                    return this.fileProcess(file, index).then((info) => {
+                    return this.fileProcess2(file, index).then((info) => {
                         players.push(info);
-                        console.log(`${file}解析完成`);
+                        console.timeEnd(`解析文件`);
                         return;
                     })
                 })());
@@ -74,7 +103,6 @@ export class ManService {
             });
         })
     }
-
 
     fileProcess(file, index) {
         let suffix = '.png';
@@ -114,7 +142,7 @@ export class ManService {
                 return new Promise((resolve) => {
                     ImageUtil.cutAndResize(resizePath, vFileTemp, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height, 300, 300);
                     ImageUtil.cut(resizePath, bFile, bPoint.x, bPoint.y, this.ogInfo.boardI.width, this.ogInfo.boardI.height);
-                    return this.boardCp(bFile).then((suit) => {
+                    return this.suitCp(bFile).then((suit) => {
                         boardsTemp.push({
                             suit: suit,
                             vFile: vFileTemp
@@ -179,7 +207,7 @@ export class ManService {
         let promises = [];
         values.forEach(value => {
             promises.push(() => {
-                return ImageUtil.isDiff(file, path.join(config.valuesMImagePath, value), 0.5).then(isDiff => {
+                return ImageUtil.isDiff(file, path.join(config.valuesMImagePath, value), 0.04).then(isDiff => {
                     if (!isDiff) {
                         resultValue = value.split('.')[0];
                     }
@@ -197,18 +225,18 @@ export class ManService {
         });
     }
 
-    boardCp(file) {
-        let boards = fs.readdirSync(config.boardsImagePath);
-        if (!boards) {
-            throw new Error('config.boardsImagePath目录空');
+    suitCp(file) {
+        let suits = fs.readdirSync(config.suitsImagePath);
+        if (!suits) {
+            throw new Error('config.suitsImagePath目录空');
         }
         let resultSuit;
         let promises = [];
-        boards.forEach(boad => {
+        suits.forEach(suit => {
             promises.push(() => {
-                return ImageUtil.isDiff(file, path.join(config.boardsImagePath, boad)).then(isDiff => {
+                return ImageUtil.isDiff(file, path.join(config.suitsImagePath, suit)).then(isDiff => {
                     if (!isDiff) {
-                        resultSuit = boad.split('.')[0];
+                        resultSuit = suit.split('.')[0];
                     }
                     return resultSuit;
                 })
@@ -230,5 +258,94 @@ export class ManService {
             result = result.then(promise);
         });
         return result;
+    }
+
+
+    //花色和值同时分析模式
+    fileProcess2(file, index) {
+
+        let suffix = '.png';
+        let id = `${file.split('.')[0]}_${index}`;
+        let originalPath = path.join(config.originalImagePath, file);
+        // ImageUtil.rotate(originalPath,path.join(config.originalImagePath, `r_${file.split('.')[0]}_${suffix}`))
+        let itemInfo = {
+            id: file.split('.')[0],
+            boards: []
+        }
+        let promises = [];
+        let boardsTemp = [];
+        for (let i = 0; i < this.ogInfo.total; i++) {
+            let bPoint = {
+                    x: this.ogInfo.firstPoint.x,
+                    y: this.ogInfo.firstPoint.y + this.ogInfo.spacing * i + (i >= 9 ? 2 : 0),
+                };
+            let boardFile = path.join(config.processedImagePath, `${id}_${i}_b${suffix}`),
+                suitFile = path.join(config.processedImagePath, `${id}_${i}_s${suffix}`);
+            promises.push(() => {
+                
+                return new Promise((resolve) => {
+                    ImageUtil.cut(originalPath, boardFile, bPoint.x, bPoint.y, this.ogInfo.boardInfo.width, this.ogInfo.boardInfo.height);
+                    // ImageUtil.cut(originalPath, suitFile, bPoint.x, bPoint.y, this.ogInfo.suitInfo.width, this.ogInfo.suitInfo.height);
+                    // return this.find(suitFile,config.suitsImagePath,0.05).then((suit) => {
+                    //     console.log(suitFile+'@@@@:'+suit);
+                    //     // boardsTemp.push({
+                    //     //     suit: suit,
+                    //     //     vFile: vFileTemp
+                    //     // });
+                    //     resolve();
+                    // })
+                    // resolve();
+                    
+                    // boardFile = path.join(config.processedImagePath, `${i}${suffix}`);
+                    console.time(boardFile);
+                    return this.find(boardFile,config.boardsImagePath,0.01).then((board) => {
+                        console.timeEnd(boardFile);
+                        console.timeEnd('找到'+board);
+                        if(!board){
+                            board = '1_0';
+                        }
+                        let arrys = board.split('_');
+                        boardsTemp.push({
+                            suit: arrys[1],
+                            value: arrys[0]
+                        });
+                        resolve();
+                    });
+                })
+            });
+        }
+
+        return this.sequenceExecutePromise(promises).then(() => {
+            itemInfo.boards = boardsTemp;
+            console.log(itemInfo);
+            return itemInfo;
+        });
+    }
+    find(sourceFile,comparePath,threshold) {
+        let files = fs.readdirSync(comparePath);
+        if (!files) {
+            throw new Error('config.boardsImagePath目录空');
+        }
+        let result;
+        let promises = [];
+        files.forEach((file,index) => {
+            promises.push((isFind) => {
+                if(isFind){
+                    return Promise.resolve(isFind);
+                }else{
+                    return ImageUtil.isDiff(sourceFile, path.join(comparePath, file),threshold).then(isDiff => {
+                        if (!isDiff) {
+                            result = file.split('.')[0];
+                            return true;
+                        }
+                        return false;
+                    })
+                }
+                
+            })
+        });
+        return this.sequenceExecutePromise(promises).then(() => {
+            return result;
+        });
     }
 }

@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="/resource/index.css">
     <script src="/resource/index.js"></script>
     <script src="/resource/lodash.js"></script>
-    <script src="/tesseract/tesseract.js"></script>
     <style>
         .row-def {
             margin-top: 20px
@@ -38,9 +37,15 @@
             background-color: #d76e36;
         }
         .ogimg{
-            width: 500px
+            top: -165px;
+            position: absolute;
+            transform-origin: right;
+            transform: rotate(-90deg);
+            width: 200px
         }
-
+        .title-r{
+            padding-top: 220px;
+        }
         .board-box span {
             margin: 5px;
         }
@@ -67,8 +72,8 @@
         </el-row>
         <el-row class="row-def">
             <div v-for="player in players" class="player-box">
-                <img class="ogimg" v-show="checked" v-bind:src="'/file/'+player.id+'.png'" /> 
-                <div class="title">{{player.id}}</div>
+                <img class="ogimg" v-show="checked" v-bind:src="'/file/og/'+player.id+'.png'" /> 
+                <div class="title" v-bind:class="{ 'title-r': checked}">{{player.id}}</div>
                 <!-- <div v-for="(board,index) in player.boards" class="board-box" v-bind:class="{ 'error': board.value != vd[player.id][index] }"> -->
                 <div v-for="(board,index) in player.boards" class="board-box">
                     <span>{{board.value}}</span>
@@ -77,9 +82,9 @@
             </div>
         </el-row>
         <el-row class="row-def">
-            <div class="player-box" v-if="player_four.length>0">
+            <div class="player-box" v-if="playerRemain.length>0">
                 <div class="title">剩下</div>
-                <div v-for="board in player_four" class="board-box">
+                <div v-for="board in playerRemain" class="board-box">
                     <span>{{board.value}}</span>
                      <img v-bind:src="'/boards/'+board.suit" /> 
                 </div>
@@ -88,16 +93,11 @@
     </div>
 
     <script>
-        window.Tesseract = Tesseract.create({
-            workerPath: 'http://localhost:8081/tesseract/worker.js',
-            langPath: 'http://localhost:8081/tesseract/',
-            corePath: 'http://localhost:8081/tesseract/index.js',
-        })
         var constv = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
         var app = new Vue({
             el: '#app',
             data: {
-                player_four: [],
+                playerRemain: [],
                 players: [],
                 activeName: 'first',
                 input: '',
@@ -140,60 +140,18 @@
                             _.forEach(this.players, function (player) {
                                 that.sortByValue(player.boards);
                             });
-                            this.sortByValue(this.player_four);
+                            this.sortByValue(this.playerRemain);
                             break;
                         case 'second':
                             _.forEach(this.players, function (player) {
                                 that.sortBySuit(player.boards);
                             });
-                            this.sortBySuit(this.player_four);
+                            this.sortBySuit(this.playerRemain);
                             break;
                     }
                 },
-                getPlayers(info) {
-                    return new Promise((resolve) =>{
-                        let players = [];
-                        let promises = [];
-                        info.forEach(playerT => {
-                            let boardsInfo = playerT.boards;
-                            let boards = [];
-                            promises.push(Tesseract.recognize('http://localhost:8081/file/' + boardsInfo.file).then(
-                                data => {
-                                    let defaultV = ['A', 'K', 'Q', 'J', '9', '8', '7', '6', '5',
-                                        '4', '3', '2'
-                                    ];
-                                    let text = data.text.replace('\n\n', '');
-                                    let values = [];
-                                    let orValue = text.split('\n');
-                                    console.log(orValue);
-                                    orValue.forEach((value, i) => {
-                                        if (defaultV.indexOf(value) === -1) {
-                                            if(value=='0'){
-                                                value = 'Q';
-                                            }else{
-                                                value = '10';
-                                            }
-                                            
-                                        }
-                                        values.push(value);
-                                        boards.push({
-                                            value: value,
-                                            suit: boardsInfo.suits[i]
-                                        })
-                                    })
-                                    players.push({
-                                        id:playerT.id,
-                                        boards:boards
-                                    });
-                                })
-                            );
-                        })
-                        return Promise.all(promises).then(()=>{
-                            resolve(players);
-                        })
-                    })
-                },
-                getPlayerFour(players) {
+                
+                getPlayerRemain(players) {
                     let remainPlayerBoards = [];
 
                     let values = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'],
@@ -227,23 +185,13 @@
                     return boardsPooling;
                 },
                 rt: function () {
-                    // Tesseract.recognize('http://localhost:8081/file/R2_1_append.png').then(data=>{
-                    //         console.log(data.text);
-                    //     })
-
                     this.fullscreenLoading = true;
                     Vue.http.get('/rt?pw=' + this.input).then((response) => {
                         if (response && response.body && response.body.data) {
                             let data = response.body.data;
-                            this.getPlayers(data.players).then(data => {
-                                this.players = data;
-                                this.player_four = this.getPlayerFour(this.players);
-                                this.fullscreenLoading = false;
-                            });
-                            // this.player_four = data.player_four;
-                            // this.players = data.players;
-                            // this.player_four = getPlayerFour(this.players);
-                            // this.handleClick();
+                            this.players = data.players;
+                            // this.playerRemain = this.getPlayerRemain(this.players);
+                            this.fullscreenLoading = false;
                         } else {
                             this.$message({
                                 showClose: true,

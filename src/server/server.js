@@ -23,6 +23,9 @@ export class Server {
         app.get('/file/:name', function (req, res) {
             res.sendFile(path.join(config.processedImagePath, req.params.name));
         });
+        app.get('/file/og/:name', function (req, res) {
+            res.sendFile(path.join(config.originalImagePath, req.params.name));
+        });
         app.get('/tesseract/:name', function (req, res) {
             res.sendFile(__dirname + "/tesseract/"+ req.params.name);
         });

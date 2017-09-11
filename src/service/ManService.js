@@ -285,25 +285,9 @@ export class ManService {
                 
                 return new Promise((resolve) => {
                     ImageUtil.cut(originalPath, boardFile, bPoint.x, bPoint.y, this.ogInfo.boardInfo.width, this.ogInfo.boardInfo.height);
-                    // ImageUtil.cut(originalPath, suitFile, bPoint.x, bPoint.y, this.ogInfo.suitInfo.width, this.ogInfo.suitInfo.height);
-                    // return this.find(suitFile,config.suitsImagePath,0.05).then((suit) => {
-                    //     console.log(suitFile+'@@@@:'+suit);
-                    //     // boardsTemp.push({
-                    //     //     suit: suit,
-                    //     //     vFile: vFileTemp
-                    //     // });
-                    //     resolve();
-                    // })
-                    // resolve();
-                    
-                    // boardFile = path.join(config.processedImagePath, `${i}${suffix}`);
                     console.time(boardFile);
                     return this.find(boardFile,config.boardsImagePath,0.01).then((board) => {
                         console.timeEnd(boardFile);
-                        console.timeEnd('找到'+board);
-                        if(!board){
-                            board = '1_0';
-                        }
                         let arrys = board.split('_');
                         boardsTemp.push({
                             suit: arrys[1],
@@ -329,11 +313,14 @@ export class ManService {
         let result;
         let promises = [];
         files.forEach((file,index) => {
+            if (file.indexOf('.DS_Store') != -1) {
+                return;
+            }
             promises.push((isFind) => {
                 if(isFind){
                     return Promise.resolve(isFind);
                 }else{
-                    return ImageUtil.isDiff(sourceFile, path.join(comparePath, file),threshold).then(isDiff => {
+                    return ImageUtil.isDiff(sourceFile, path.join(comparePath, file),threshold,path.join(config.processedImagePath, 't.png')).then(isDiff => {
                         if (!isDiff) {
                             result = file.split('.')[0];
                             return true;

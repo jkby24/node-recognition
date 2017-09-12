@@ -1,489 +1,356 @@
-
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-		<title>Resemble.js : Image analysis</title>
-		<meta name="description" content="">
-		<meta name="viewport" content="width=device-width">
-		<link rel="stylesheet" href="/resource/bs.css">
-		<link rel="stylesheet" href="/resource/resemble.css">
-	</head>
-	<body>
-		<div class="container">
-			<header>
-				<div class="page-header">
-					<h1>Resemble.js : Image analysis and comparison</h1>
-				</div>
-			</header>
 
-			<section role="main">
-				<div class="row">
-					<div class="span12">
-						<div class="hero-unit">
-							<div class="row">
-								<div class="span6">
-									<p>
-										<div id="drop-zone" class="drop-zone">
-											Drop image here.
-										</div>
-									</p>
-								</div>
-								<div class="span4">
-									<h2>What is this?</h2>
-									<p>
-										Resemble.js analyses and compares images with HTML5 canvas and JavaScript.
-									</p>
-									<p>
-										<strong>Try it for yourself.</strong>
-									</p>
-									<div id="image-data" style="display:none">
+<head>
+    <meta charset="utf-8">
+    <title>index</title>
+    <script src="/resource/vue.js"></script>
+    <script src="/resource/vue-resource.js"></script>
+    <link rel="stylesheet" href="/resource/index.css">
+    <script src="/resource/index.js"></script>
+    <script src="/resource/lodash.js"></script>
+    <script src="/resource/resemble.js"></script>
+    <style>
+        .row-def {
+            margin-top: 20px
+        }
 
-										RGBA
-									    <div class="progress progress-danger">
-										    <div id="red" class="bar" style="width: 0%;"></div>
-									    </div>
-									    <div class="progress progress-success">
-										    <div id="green" class="bar" style="width: 0%;"></div>
-									    </div>
-									    <div class="progress">
-										    <div id="blue" class="bar" style="width: 0%;"></div>
-									    </div>
-									    <div class="progress last">
-										    <div id="alpha" class="bar" style="width: 0%;"></div>
-									    </div>
-										Black &amp; white
-										<div class="progress">
-											<div id="black" class="bar" style="width: 0%;"></div>
-										</div>
-										<div class="progress last">
-											<div id="white" class="bar" style="width: 0%;"></div>
-										</div>
-									    Brightness
-									    <div class="progress progress-warning">
-									    	<div id="brightness" class="bar" style="width: 0%;"></div>
-									    </div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="span12">
-						<div class="row">
-							<div class="span6">
-								<div id="dropzone1" class="small-drop-zone">
-									Drop first image
-								</div>
-								<div id="dropzone2" class="small-drop-zone">
-									Drop second image
-								</div>
-							</div>
-							<div class="span6">
-								<h2>Compare two images?</h2>
-								<p>
-									Drop two images on the boxes to the left.  The box below will show a generated 'diff' image, pink areas show mismatch.  This example best works with two very similar but slightly different images.  Try for yourself!
-								</p>
-								<p>
-								Don't have any images to compare? <button class="btn" id="example-images">Use example images</button>
-								</p>
-								<div id="image-diff" class="small-drop-zone">
-									Diff will appear here.
-								</div>
-								<br/>
+        .player-box {
+            /* border: 2px solid #20a0ff; */
+            position: relative;
+            margin-top: 20px;
+            background-color: #ededed;
+        }
 
-								<div class="btn-group buttons" style="display:none">
-									<button class="btn" id="raw">Ignore nothing</button>
-									<button class="btn active" id="less">Ignore less</button>
-									<button class="btn" id="colors">Ignore colors</button>
-									<button class="btn" id="antialising">Ignore antialiasing</button>
-								</div>
+        .player-box .title {
+            margin: 10px
+        }
 
-								<br/>
-								<br/>
-								<div class="btn-group buttons" style="display:none">
-									<button class="btn active" id="original-size">Use original size</button>
-									<button class="btn" id="same-size">Scale to same size</button>
-								</div>
+        .board-box {
+            border: 1px solid #a9a7a7;
+            display: inline-block;
+            position: relative;
+            width: 30px;
+            margin: 10px;
+        }
 
-								<div class="btn-group buttons" style="display:none">
-									<button class="btn active" id="pink">Pink</button>
-									<button class="btn" id="yellow">Yellow</button>
-								</div>
-								<br/>
-								<br/>
+        .error {
+            border: 1px solid #e02323;
+            background-color: #d76e36;
+        }
 
-								<div class="btn-group buttons" style="display:none">
-									<button class="btn active" id="flat">Flat</button>
-									<button class="btn" id="movement">Movement</button>
-									<button class="btn" id="flatDifferenceIntensity">Flat with diff intensity</button>
-									<button class="btn" id="movementDifferenceIntensity">Movement with diff intensity</button>
-								</div>
-								<br/>
-								<br/>
+        .ogimg {
+            top: -165px;
+            position: absolute;
+            transform-origin: right;
+            transform: rotate(-90deg);
+            width: 200px
+        }
 
-								<div class="btn-group buttons" style="display:none">
-									<button class="btn active" id="opaque">Opaque</button>
-									<button class="btn" id="transparent">Transparent</button>
-								</div>
-								<br/>
-								<br/>
+        .title-r {
+            padding-top: 220px;
+        }
 
-								<div class="btn-group buttons" style="display:none">
-									<div class="row">
-										<div class="span1">
-											<label>Left</label>
-											<input type="number" class="input-mini" id="x1" value="100" />
-										</div>
-										<div class="span1">
-											<label>Top</label>
-											<input type="number" class="input-mini" id="y1" value="100" />
-										</div>
-										<div class="span1">
-											<label>Right</label>
-											<input type="number" class="input-mini" id="x2" value="400" />
-										</div>
-										<div class="span1">
-											<label>Bottom</label>
-											<input type="number" class="input-mini" id="y2" value="300" />
-										</div>
-										<div class="span2">
-											<label>&nbsp;</label>
-											<button class="btn" id="boundingBox">Set bounding box</button>
-										</div>
-									</div>
-								</div>
-								<br/>
-								<br/>
-								<div id="diff-results" style="display:none;">
-									<p>
-										<strong>The second image is <span id="mismatch"></span>% different compared to the first.
-										<span id="differentdimensions" style="display:none;">And they have different dimensions.</span></strong>
-									</p>
-									<p>
-										Use the buttons above to change the comparison algorithm.  Perhaps you don't care about color? Annoying antialiasing causing too much noise?  Resemble.js offers multiple comparison options.
-									</p>
-								</div>
+        .board-box span {
+            margin: 5px;
+        }
+    </style>
+</head>
 
-								<p id="thesame" style="display:none;">
-									<strong>These images are the same!</strong>
-								</p>
-							</div>
-						</div>
-					</div>
-				</div>
-				<br/><br/>
-				<div class="row">
-					<div class="span6">
-						<h2>Why?</h2>
-						<p>
-							Resemble.js can be used for any image analysis and comparison requirement you might have in the browser. However, it has been designed and built for use by the PhantomJS powered visual regression library <a href="https://github.com/Huddle/PhantomCSS" target="_blank">PhantomCSS</a>. PhantomCSS needs to be able to ignore antialiasing as this would cause differences between screenshots derived from different machines.
-						</p>
-						<p>
-							Resemble.js uses the <a href="http://www.w3.org/TR/file-upload/" target="_blank">HTML5 File API</a> to parse image data, and canvas for rendering image diffs.
-						</p>
-						<p>
-							<br/>
-							<a class="btn btn-large btn-primary" href="https://github.com/Huddle/Resemble.js"><strong>View project on GitHub</strong></a>
-						</p>
-					</div>
-					<div class="span6">
-						<h2>How can I use it?</h2>
-						<p>Retrieve basic analysis on image.</p>
-						<pre>
-var api = resemble(fileData).onComplete(function(data){
-	return data;
-	/*
-	{
-	  red: 100,
-	  green: 100,
-	  blue: 100,
-	  brightness: 100,
-	  alpha: 100,
-	  white: 100,
-	  black: 100
-	}
-	*/
-});</pre>
-						<p>Use resemble to compare two images.</p>
-						<pre>
-resemble(file).compareTo(file2).onComplete(function(){
-	return data;
-	/*
-	{
-	  misMatchPercentage : 100, // %
-	  isSameDimensions: true, // or false
-	  getImageDataUrl: function(){}
-	}
-	*/
-});</pre>
-<p>Take a look at the <a href="demoassets/main.js" target="_blank">JavaScript for this demo page</a> from a better example</p>
-					</div>
-				</div>
-			</section>
+<body>
+    <div id="app">
 
-			<footer class="footer">
-				<p>	
-					Created by <a href="https://github.com/jamescryer" target="_blank">James Cryer</a> and the Huddle development team.
-				</p>
-				<p>
-					The image used in the comparison example was created by <a href="https://twitter.com/Shadowise" target="_blank">Daniel Rajendran</a>
-				</p>
-			</footer>
-		</div>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-		<script src="/resource/resemble.js"></script>
-	</body>
+        <el-row class="row-def">
+            <el-input style="width: 180px;" v-model="input" placeholder="请输入安全码"></el-input>
+            <el-button v-show="initDone" type="primary" @click="rt" element-loading-text="解析中" v-loading.fullscreen.lock="fullscreenLoading">
+                开始
+            </el-button>
+        </el-row>
+        <el-row class="row-def">
+            <el-checkbox v-model="checked">显示屏幕图</el-checkbox>
+        </el-row>
+        <el-row class="row-def">
+            <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
+                <el-tab-pane label="牌面" name="first"></el-tab-pane>
+                <el-tab-pane label="花色" name="second"></el-tab-pane>
+            </el-tabs>
+        </el-row>
+        <el-row class="row-def">
+            <div v-for="player in players" class="player-box">
+                <img class="ogimg" v-show="checked" v-bind:src="'/file/og/'+player.id+'.png'" />
+                <div class="title" v-bind:class="{ 'title-r': checked}">{{player.id}}</div>
+                <!-- <div v-for="(board,index) in player.boards" class="board-box" v-bind:class="{ 'error': board.value != vd[player.id][index] }"> -->
+                <div v-for="(board,index) in player.boards" class="board-box">
+                    <span>{{board.value}}</span>
+                    <img v-bind:src="'/suits/'+board.suit" />
+                </div>
+            </div>
+        </el-row>
+        <el-row class="row-def">
+            <div class="player-box" v-if="playerRemain.length>0">
+                <div class="title">剩下</div>
+                <div v-for="board in playerRemain" class="board-box">
+                    <span>{{board.value}}</span>
+                    <img v-bind:src="'/suits/'+board.suit" />
+                </div>
+            </div>
+        </el-row>
+    </div>
+
     <script>
-        $(function(){
-	var $target = $('#drop-zone');
+        var constV = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'],
+            suits = [0, 1, 2, 3];
+        let boardsNamePooling = [];
+        constV.forEach(value => {
+            suits.forEach(suit => {
+                boardsNamePooling.push(value + '_' + suit)
+            })
+        });
+        var app = new Vue({
+            el: '#app',
+            data: {
+                playerRemain: [],
+                players: [],
+                activeName: 'first',
+                input: '',
+                fullscreenLoading: false,
+                checked: true,
+                vd: {
+                    'T2_2': ['Q', 'Q', 'J', '9', '9', '8', '7', '7', '5', '4', '3', '3', '2'],
+                    'C2_0': ['A', 'A', 'K', 'Q', 'J', 'J', '10', '10', '9', '6', '6', '5', '4'],
+                    'R2_1': ['A', 'A', 'K', 'Q', '10', '8', '8', '7', '6', '5', '3', '2', '2']
+                    // s   K K J 10 9 8 7 6 5 4 4 3 2
+                },
+                initDone: false,
+                boardsFiles: {},
+                tempPooling:[]
+            },
+            methods: {
+                sortByValue(boards) {
+                    boards.sort(function (a, b) {
+                        if (constV.indexOf(a.value) > constV.indexOf(b.value)) {
+                            return 1;
+                        } else if (constV.indexOf(a.value) < constV.indexOf(b.value)) {
+                            return -1;
+                        } else {
+                            return (+a.suit) > (+b.suit) ? 1 : -1;
+                        }
+                    });
+                },
+                sortBySuit(boards) {
+                    boards.sort(function (a, b) {
+                        if ((+a.suit) > (+b.suit)) {
+                            return 1;
+                        } else if ((+a.suit) < (+b.suit)) {
+                            return -1;
+                        } else {
+                            return constV.indexOf(a.value) > constV.indexOf(b.value) ? 1 : -1;
+                        }
+                    });
+                },
+                handleClick() {
+                    var that = this;
+                    switch (this.activeName) {
+                        case 'first':
+                            _.forEach(this.players, function (player) {
+                                that.sortByValue(player.boards);
+                            });
+                            this.sortByValue(this.playerRemain);
+                            break;
+                        case 'second':
+                            _.forEach(this.players, function (player) {
+                                that.sortBySuit(player.boards);
+                            });
+                            this.sortBySuit(this.playerRemain);
+                            break;
+                    }
+                },
 
-	function dropZone($target, onDrop){
-		$target.
-			bind('dragover', function(){
-				$target.addClass( 'drag-over' );
-				return false;
-			}).
-			bind("dragend", function () {
-				$target.removeClass( 'drag-over' );
-				return false;
-			}).
-			bind("dragleave", function () {
-				$target.removeClass( 'drag-over' );
-				return false;
-			}).
-			bind("drop", function(event) {
-				var file = event.originalEvent.dataTransfer.files[0];
+                getPlayerRemain(players) {
+                    let remainPlayerBoards = [];
 
-				event.stopPropagation();
-				event.preventDefault();
+                    let constV = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'],
+                        suits = [0, 1, 2, 3];
+                    let boardsPooling = [];
+                    constV.forEach(value => {
+                        suits.forEach(suit => {
+                            boardsPooling.push({
+                                value: value,
+                                suit: suit
+                            })
+                        })
+                    });
+                    players.forEach((player) => {
+                        player.boards.forEach(board => {
+                            let index = boardsPooling.findIndex(bt => {
+                                return board.value == bt.value && board.suit == bt.suit;
+                            });
+                            if (index != -1) {
+                                boardsPooling.splice(index, 1);
+                            } else {
+                                // console.log(`未找到值：${board.value},花色：${board.suit}`)
+                            }
+                        })
+                    });
 
-				$target.removeClass( 'drag-over' );
+                    // console.log('剩下：')
+                    // boardsPooling.forEach(bo => {
+                    //     console.log(`值：${bo.value},花色：${bo.suit}`);
+                    // })
+                    return boardsPooling;
+                },
+                readFile(url) {
+                    return new Promise((resolve) => {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('GET', url, true);
+                        xhr.responseType = 'blob';
+                        xhr.onload = function (e) {
+                            resolve(this.response);
+                        };
+                        xhr.send();
+                    });
+                },
+                sequenceExecutePromise(promises) {
+                    var result = Promise.resolve();
+                    promises.forEach((promise) => {
+                        result = result.then(promise);
+                    });
+                    return result;
+                },
+                find(fileName) {
+                    console.time(`解析${fileName}`);
+                    var file = 'processed/' + fileName;
+                    let fileBlob;
+                    let promises = [];
+                    let resultBoard;
+                    promises.push(() => {
+                        return new Promise((resolve) => {
+                            this.readFile(file).then((data) => {
+                                fileBlob = data;
+                                resolve();
+                            });
+                        });
+                    });
+                    _.forEach(boardsNamePooling, board => {
+                        promises.push((isFind) => {
+                            if (isFind) {
+                                return Promise.resolve(isFind);
+                            }else if(this.tempPooling.indexOf(board)!=-1){
+                                return Promise.resolve(false);
+                            } else {
+                                return new Promise((resolve) => {
+                                    let diff = resemble(fileBlob).compareTo(this.boardsFiles[board])
+                                        .onComplete((data) => {
+                                            if (data.misMatchPercentage ==0) {
+                                                resultBoard = board;
+                                                resolve(true);
+                                            } else {
+                                                resolve(false);
+                                            }
+                                        });
+                                    // diff.ignoreAntialiasing();
+                                })
+                            }
+                        })
+                    })
+                    return this.sequenceExecutePromise(promises).then(() => {
+                        console.timeEnd(`解析${fileName}`);
+                        this.tempPooling.push(resultBoard);
+                        console.log(this.tempPooling)
+                        return resultBoard;
+                    });
+                },
+                getPlayerBoards: function (player) {
+                    let promises = [];
+                    let boardsResult = []
+                    _.forEach(player.boards, board => {
+                        promises.push(() => {
+                            return new Promise((resolve) => {
+                                this.find(board.file).then((result) => {
+                                    if(!result){
+                                        console.log('未找到'+board.file)
+                                        result = '1_0'
+                                    }
+                                    let arrys = result.split('_');
+                                    boardsResult.push({
+                                        suit: arrys[1],
+                                        value: arrys[0]
+                                    })
+                                    resolve();
+                                })
+                            })
+                        })
+                    })
+                    return this.sequenceExecutePromise(promises).then(() => {
+                        this.players.push({
+                            id: player.id,
+                            boards: boardsResult
+                        })
+                        return;
+                    });
+                },
+                initPlayers: function (players) {
+                    this.players = [];
+                    this.tempPooling = [];
+                    let promises = [];
 
-				var droppedImage = new Image();
-				var fileReader = new FileReader();
+                    _.forEach(players, player => {
+                        promises.push(this.getPlayerBoards(player));
+                    })
+                    return Promise.all(promises).then(() => {
 
-				fileReader.onload = function (event) {
-					droppedImage.src = event.target.result;
-					$target.html(droppedImage);
-				};
+                    });
+                },
+                rt: function () {
+                    // this.find('r_1__1_5_b');
 
-				fileReader.readAsDataURL(file);
 
-				onDrop(file);
-			});
-	}
+                    this.fullscreenLoading = true;
+                    console.time('总时间')
+                    Vue.http.get('/rt?pw=' + this.input).then((response) => {
+                        if (response && response.body && response.body.data) {
+                            let data = response.body.data;
+                            this.initPlayers(data.players).then(() => {
+                                this.fullscreenLoading = false;
+                                console.timeEnd('总时间')
+                            });
+                            // this.players = data.players;
+                            // this.playerRemain = this.getPlayerRemain(this.players);
+                            
+                        } else {
+                            this.$message({
+                                showClose: true,
+                                message: response.body.error,
+                                type: 'error'
+                            });
+                            this.fullscreenLoading = false;
+                        }
+                    }, (response) => {
+                        // 响应错误回调
+                        this.fullscreenLoading = false;
+                    });
+                },
+                init: function () {
+                    let promises = [];
+                    boardsNamePooling.forEach(name => {
+                        promises.push(() => {
+                            return this.readFile('boards/' + name).then((data) => {
+                                this.boardsFiles[name] = data;
+                                return;
+                            });
 
-	dropZone($target, function(file){
-
-		resemble(file).onComplete(function(data){
-			$('#image-data').show();
-			$('#red').css('width',data.red+'%');
-			$('#green').css('width',data.green+'%');
-			$('#blue').css('width',data.blue+'%');
-			$('#alpha').css('width',data.alpha+'%');
-			$('#brightness').css('width',data.brightness+'%');
-			$('#white').css('width',data.white+'%');
-			$('#black').css('width',data.black+'%');
-		});
-
-	});
-
-	function onComplete(data){
-		var time = Date.now();
-		var diffImage = new Image();
-		diffImage.src = data.getImageDataUrl();
-
-		$('#image-diff').html(diffImage);
-
-		$(diffImage).click(function(){
-			window.open(diffImage.src, '_blank');
-		});
-
-		$('.buttons').show();
-
-		if(data.misMatchPercentage == 0){
-			$('#thesame').show();
-			$('#diff-results').hide();
-		} else {
-			$('#mismatch').text(data.misMatchPercentage);
-			if(!data.isSameDimensions){
-				$('#differentdimensions').show();
-			} else {
-				$('#differentdimensions').hide();
-			}
-			$('#diff-results').show();
-			$('#thesame').hide();
-		}
-	}
-
-	var file1;
-	var file2;
-	var resembleControl;
-
-	dropZone($('#dropzone1'), function(file){
-		file1 = file;
-		if(file2){
-			resembleControl = resemble(file).compareTo(file2).onComplete(onComplete);
-		}
-	});
-
-	dropZone($('#dropzone2'), function(file){
-		file2 = file;
-		if(file1){
-			resembleControl = resemble(file).compareTo(file1).onComplete(onComplete);
-		}
-	});
-
-	var buttons = $('.buttons button');
-
-	buttons.click(function(){
-		var $this = $(this);
-
-		$this.parent('.buttons').find('button').removeClass('active');
-		$this.addClass('active');
-
-		if($this.is('#raw')){
-			resembleControl.ignoreNothing();
-		}
-		else
-		if($this.is('#less')){
-			resembleControl.ignoreLess();
-		}
-		if($this.is('#colors')){
-			resembleControl.ignoreColors();
-		}
-		else
-		if($this.is('#antialising')){
-			resembleControl.ignoreAntialiasing();
-		}
-		else
-		if($this.is('#same-size')){
-			resembleControl.scaleToSameSize();
-		}
-		else
-		if($this.is('#original-size')){
-			resembleControl.useOriginalSize();
-		}
-		else
-		if($this.is('#pink')){
-			resemble.outputSettings({
-				errorColor: {
-					red: 255,
-					green: 0,
-					blue: 255
-				}
-			});
-			resembleControl.repaint();
-		}
-		else
-		if($this.is('#yellow')){
-			resemble.outputSettings({
-				errorColor: {
-					red: 255,
-					green: 255,
-					blue: 0
-				}
-			});
-			resembleControl.repaint();
-		}
-		else
-		if($this.is('#flat')){
-			resemble.outputSettings({
-				errorType: 'flat'
-			});
-			resembleControl.repaint();
-		}
-		else
-		if($this.is('#movement')){
-			resemble.outputSettings({
-				errorType: 'movement'
-			});
-			resembleControl.repaint();
-		}
-		else
-		if($this.is('#flatDifferenceIntensity')){
-			resemble.outputSettings({
-				errorType: 'flatDifferenceIntensity'
-			});
-			resembleControl.repaint();
-		}
-		else
-		if($this.is('#movementDifferenceIntensity')){
-			resemble.outputSettings({
-				errorType: 'movementDifferenceIntensity'
-			});
-			resembleControl.repaint();
-		}
-		else
-		if($this.is('#opaque')){
-			resemble.outputSettings({
-				transparency: 1
-			});
-			resembleControl.repaint();
-		}
-		else
-		if($this.is('#transparent')){
-			resemble.outputSettings({
-				transparency: 0.3
-			});
-			resembleControl.repaint();
-		}
-		else
-		if($this.is('#boundingBox')){
-			resemble.outputSettings({
-				boundingBox: {
-					left: $("#x1").val(),
-					top: $("#y1").val(),
-					right: $("#x2").val(),
-					bottom: $("#y2").val()
-				}
-			});
-			resembleControl.repaint();
-			$this.removeClass('active');
-		}
-	});
-
-	(function(){
-		var xhr = new XMLHttpRequest();
-		var xhr2 = new XMLHttpRequest();
-		var done = $.Deferred();
-		var dtwo = $.Deferred();
-
-		xhr.open('GET', 'demoassets/People.jpg', true);
-		xhr.responseType = 'blob';
-		xhr.onload = function(e) {
-			done.resolve(this.response);
-		};
-		xhr.send();
-
-		xhr2.open('GET', 'demoassets/People2.jpg', true);
-		xhr2.responseType = 'blob';
-		xhr2.onload = function(e) {
-			dtwo.resolve(this.response);
-		};
-		xhr2.send();
-
-		$('#example-images').click(function(){
-
-			$('#dropzone1').html('<img src="demoassets/People.jpg"/>');
-			$('#dropzone2').html('<img src="demoassets/People2.jpg"/>');
-
-			$.when(done, dtwo).done(function(file, file1){
-				if (typeof FileReader === 'undefined') {
-					resembleControl = resemble('demoassets/People.jpg').compareTo('demoassets/People2.jpg').onComplete(onComplete);
-				} else {
-					resembleControl = resemble(file).compareTo(file1).onComplete(onComplete);
-				}
-			});
-
-			return false;
-		});
-
-	}());
-
-});
+                        })
+                    })
+                    this.sequenceExecutePromise(promises).then(() => {
+                        this.initDone = true;
+                    })
+                }
+            },
+            mounted() {
+                this.init();
+            }
+        });
     </script>
+</body>
+
 </html>

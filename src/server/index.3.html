@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>Resemble.js : Image analysis</title>
+		<meta name="description" content="">
+		<meta name="viewport" content="width=device-width">
+		<link rel="stylesheet" href="/resource/bs.css">
+		<link rel="stylesheet" href="/resource/resemble.css">
+	</head>
+	<body>
+        <button class="btn" id="example-images">Use example images</button>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script src="/resource/resemble.js"></script>
+	</body>
+    <script>
+        $(function(){
+	
+
+	function onComplete(data){
+		if(data.misMatchPercentage == 0){
+			alert('same')
+		} else {
+			alert('diff');
+		}
+    }
+    
+	(function(){
+		
+
+		$('#example-images').click(function(){
+            resembleControl = resemble('processed/r_1__1_5_b').compareTo('boards/10_1').onComplete(onComplete);
+			// $.when(done, dtwo).done(function(file, file1){
+            //     debugger
+			// 	// if (typeof FileReader === 'undefined') {
+			// 		resembleControl = resemble('processed/r_1__1_5_b').compareTo('boards/10_3').onComplete(onComplete);
+			// 	// } else {
+			// 	// 	resembleControl = resemble(file).compareTo(file1).onComplete(onComplete);
+			// 	// }
+			// });
+
+			return false;
+		});
+
+	}());
+
+});
+    </script>
+</html>

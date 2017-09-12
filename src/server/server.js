@@ -23,14 +23,20 @@ export class Server {
         app.get('/file/:name', function (req, res) {
             res.sendFile(path.join(config.processedImagePath, req.params.name));
         });
+        app.get('/processed/:name', function (req, res) {
+            res.sendFile(path.join(config.processedImagePath, req.params.name));
+        });
+        app.get('/boards/:name', function (req, res) {
+            res.sendFile(path.join(config.boardsImagePath, req.params.name + ".png"));
+        });
         app.get('/file/og/:name', function (req, res) {
             res.sendFile(path.join(config.originalImagePath, req.params.name));
         });
         app.get('/tesseract/:name', function (req, res) {
             res.sendFile(__dirname + "/tesseract/"+ req.params.name);
         });
-        app.get("/boards/:suit", function(req, res) {
-            res.sendFile(__dirname + "/resource/boards/"+ req.params.suit + ".png");
+        app.get("/suits/:suit", function(req, res) {
+            res.sendFile(__dirname + "/resource/suits/"+ req.params.suit + ".png");
         });
         app.get("/resource/fonts/:name", function(req, res) {
             res.sendFile(__dirname + "/resource/"+ req.params.name);

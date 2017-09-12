@@ -5,19 +5,14 @@
 // });
 
 //正式代码
-import {Server} from './server/server.js';
-let server = new Server();
-server.init();
-// import fs from 'fs';
-// import config from './config.js';
-// import path from 'path';
-// import ImageUtil from './utils/ImageUtil.js';
-// ImageUtil.isDiff(path.join(config.testImagePath, 't2_c1_0_11_b.png'), path.join(config.testImagePath, '13.png'),0.01,path.join(config.testImagePath, 'tt2.png')).then(isDiff => {
-//     if (!isDiff) {
-//         console.log('成功');
-//     }
-//     return result;
-// });
+// import {Server} from './server/server.js';
+// let server = new Server();
+// server.init();
+import fs from 'fs';
+import config from './config.js';
+import path from 'path';
+import ImageUtil from './utils/ImageUtil.js';
+ImageUtil.contrast(path.join(config.testImagePath, 't2_c1_0_11_b.png'));
 // // function sequenceExecutePromise(promises) {
 // //     var result = Promise.resolve();
 // //     promises.forEach((promise) => {
@@ -122,3 +117,15 @@ server.init();
 //             // });
 //         })
 //     })
+
+
+// import fs from 'fs';
+// import config from './config.js';
+// import path from 'path';
+// import ImageUtil from './utils/ImageUtil.js';
+// ImageUtil.isDiff(path.join(config.testImagePath, 't2_c1_0_11_b.png'), path.join(config.testImagePath, '13.png'),0.01,path.join(config.testImagePath, 'tt2.png')).then(isDiff => {
+//     if (!isDiff) {
+//         console.log('成功');
+//     }
+//     return result;
+// });

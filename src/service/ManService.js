@@ -6,6 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import ImageUtil from '../utils/ImageUtil.js';
 import FileUtil from '../utils/FileUtil.js';
+import sd from 'silly-datetime';
 // import _ from 'lodash';
 // import BoardsConst from '../utils/BoardsConst.js';
 export class ManService {
@@ -51,11 +52,11 @@ export class ManService {
         let xt = 1.725;
         this.ogInfo = {
             total: 13,
-            firstPoint:{
+            firstPoint: {
                 x: 75 * xt,
                 y: 20 * xt
             },
-            boardInfo:{
+            boardInfo: {
                 width: 75 * xt,
                 height: 30 * xt
             },
@@ -85,11 +86,9 @@ export class ManService {
                 if (file.indexOf('.DS_Store') != -1) {
                     return;
                 }
-                console.time(`解析文件`);
                 promises.push((() => {
-                    return this.fileProcess2(file, index).then((info) => {
+                    return this.fileProcess3(file, index).then((info) => {
                         players.push(info);
-                        console.timeEnd(`解析文件`);
                         return;
                     })
                 })());
@@ -137,7 +136,7 @@ export class ManService {
             let vFileTemp = path.join(config.processedImagePath, `${id}_${i}_v_temp${suffix}`),
                 vFile = path.join(config.processedImagePath, `${id}_${i}_v${suffix}`),
                 bFile = path.join(config.processedImagePath, `${id}_${i}_b${suffix}`);
-            
+
             promises.push(() => {
                 return new Promise((resolve) => {
                     ImageUtil.cutAndResize(resizePath, vFileTemp, vPoint.x, vPoint.y, this.ogInfo.valueI.width, this.ogInfo.valueI.height, 300, 300);
@@ -276,17 +275,17 @@ export class ManService {
         let boardsTemp = [];
         for (let i = 0; i < this.ogInfo.total; i++) {
             let bPoint = {
-                    x: this.ogInfo.firstPoint.x,
-                    y: this.ogInfo.firstPoint.y + this.ogInfo.spacing * i + (i >= 9 ? 2 : 0),
-                };
+                x: this.ogInfo.firstPoint.x,
+                y: this.ogInfo.firstPoint.y + this.ogInfo.spacing * i + (i >= 9 ? 2 : 0),
+            };
             let boardFile = path.join(config.processedImagePath, `${id}_${i}_b${suffix}`),
                 suitFile = path.join(config.processedImagePath, `${id}_${i}_s${suffix}`);
             promises.push(() => {
-                
+
                 return new Promise((resolve) => {
                     ImageUtil.cut(originalPath, boardFile, bPoint.x, bPoint.y, this.ogInfo.boardInfo.width, this.ogInfo.boardInfo.height);
                     console.time(boardFile);
-                    return this.find(boardFile,config.boardsImagePath,0.01).then((board) => {
+                    return this.find(boardFile, config.boardsImagePath, 0.01).then((board) => {
                         console.timeEnd(boardFile);
                         let arrys = board.split('_');
                         boardsTemp.push({
@@ -305,22 +304,22 @@ export class ManService {
             return itemInfo;
         });
     }
-    find(sourceFile,comparePath,threshold) {
+    find(sourceFile, comparePath, threshold) {
         let files = fs.readdirSync(comparePath);
         if (!files) {
             throw new Error('config.boardsImagePath目录空');
         }
         let result;
         let promises = [];
-        files.forEach((file,index) => {
+        files.forEach((file, index) => {
             if (file.indexOf('.DS_Store') != -1) {
                 return;
             }
             promises.push((isFind) => {
-                if(isFind){
+                if (isFind) {
                     return Promise.resolve(isFind);
-                }else{
-                    return ImageUtil.isDiff(sourceFile, path.join(comparePath, file),threshold,path.join(config.processedImagePath, 't.png')).then(isDiff => {
+                } else {
+                    return ImageUtil.isDiff(sourceFile, path.join(comparePath, file), threshold, path.join(config.processedImagePath, 't.png')).then(isDiff => {
                         if (!isDiff) {
                             result = file.split('.')[0];
                             return true;
@@ -328,11 +327,48 @@ export class ManService {
                         return false;
                     })
                 }
-                
+
             })
         });
         return this.sequenceExecutePromise(promises).then(() => {
             return result;
+        });
+    }
+    //花色和值同时分析模式(客户端分析)
+    fileProcess3(file, index) {
+
+        let suffix = '.png';
+        let id = `${file.split('.')[0]}_${index}`;
+        let originalPath = path.join(config.originalImagePath, file);
+        // ImageUtil.rotate(originalPath,path.join(config.originalImagePath, `r_${file.split('.')[0]}_${suffix}`))
+        let itemInfo = {
+            id: file.split('.')[0],
+            boards: []
+        }
+        let time = sd.format(new Date(), 'MMDDHHmmss');
+        let promises = [];
+        let boardsTemp = [];
+        for (let i = 0; i < this.ogInfo.total; i++) {
+            let bPoint = {
+                x: this.ogInfo.firstPoint.x,
+                y: this.ogInfo.firstPoint.y + this.ogInfo.spacing * i + (i >= 9 ? 2 : 0),
+            };
+            let boardId = `${id}_${i}_${time}${suffix}`;
+            promises.push(() => {
+                return new Promise((resolve) => {
+                    ImageUtil.cut(originalPath, path.join(config.processedImagePath, boardId), bPoint.x, bPoint.y, this.ogInfo.boardInfo.width, this.ogInfo.boardInfo.height);
+                    boardsTemp.push({
+                        file:boardId
+                    });
+                    resolve();
+                })
+            });
+        }
+
+        return this.sequenceExecutePromise(promises).then(() => {
+            itemInfo.boards = boardsTemp;
+            console.log(itemInfo);
+            return itemInfo;
         });
     }
 }
